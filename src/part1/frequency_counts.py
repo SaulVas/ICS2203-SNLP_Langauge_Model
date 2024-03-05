@@ -39,7 +39,7 @@ def frequency_counts():
     Returns:
         None
     """
-    training_dir_path = '../../corpus/train/'
+    training_dir_path = '../../corpus/training_set/'
     xml_files = [f for f in os.listdir(training_dir_path) if f.endswith('.xml')]
 
     # Create frequency counts for unigrams, bigrams, and trigrams and save to a json file
