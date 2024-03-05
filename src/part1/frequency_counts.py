@@ -23,33 +23,35 @@ Functions:
 The module uses `xml.etree.ElementTree` for XML parsing, `collections.defaultdict`
 for counting n-gram frequencies, and `json` for saving the results.
 """
-
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 import json
+import os
 
 def frequency_counts():
-    """ Computes and saves n-gram frequencies from an XML text file.
-
-    This function parses an XML file, extracts text from a specified node,
-    and calculates the frequencies of unigrams, bigrams, and trigrams within
-    the text. The computed frequencies are saved in separate JSON files,
-    one for each n-gram type, with filenames indicating the n-gram size.
-
-    Assumes the text is contained within a 'wtext' node in the XML structure.
-    The output JSON files are saved to a relative directory '../n_grams/'.
-
-    No parameters are taken, and the XML file path is hard-coded. The function
-    is designed to work with a specific XML structure and file location.
     """
-    tree = ET.parse('../../corpus/Texts/aca/A6U.xml')
-    root = tree.getroot()
-    text_node = root.find('.//wtext')
+    Calculate the frequency counts of unigrams, bigrams, and trigrams
+    from XML files in a given directory. Save the counts to a JSON file.
+
+    Parameters:
+        None
+
+    Returns:
+        None
+    """
+    training_dir_path = '../../corpus/train/'
+    xml_files = [f for f in os.listdir(training_dir_path) if f.endswith('.xml')]
 
     # Create frequency counts for unigrams, bigrams, and trigrams and save to a json file
     for number_of_words in range(1, 4):
         n_gram_counts = defaultdict(int)
-        traverse_tree(text_node, number_of_words, n_gram_counts)
+
+        for file in xml_files:
+            path = os.path.join(training_dir_path, file)
+            tree = ET.parse(path)
+            root = tree.getroot()
+            for child in root:
+                traverse_tree(child, number_of_words, n_gram_counts)
 
         with open(f'../n_grams/{number_of_words}_gram_counts.json', 'w', encoding='utf-8') as fp:
             json.dump(n_gram_counts, fp)
@@ -63,12 +65,16 @@ def traverse_tree(node, number_of_words, counts):
     node (xml.etree.ElementTree.Element): The current node in the XML tree.
     number_of_words (int): The number of words in the n-grams to be counted.
     counts (collections.defaultdict): A dictionary to store the n-gram counts.
+
+    Returns:
+        None
     """
-    for child in node:
-        if child.tag == 's':
-            handle_sentence(child, number_of_words, counts)
-        else:
-            traverse_tree(child, number_of_words, counts)
+    if node.tag != 'teiHeader':
+        for child in node:
+            if child.tag == 's':
+                handle_sentence(child, number_of_words, counts)
+            else:
+                traverse_tree(child, number_of_words, counts)
 
 
 def handle_sentence(sentence_node, number_of_words, counts):
@@ -78,6 +84,9 @@ def handle_sentence(sentence_node, number_of_words, counts):
     sentence_node (xml.etree.ElementTree.Element): The current sentence node in the XML tree.
     number_of_words (int): The number of words in the n-grams to be counted.
     counts (collections.defaultdict): A dictionary to store the n-gram counts.
+    
+    Returns:
+        None
     """
     text = retrieve_text(sentence_node) + " </s>"
     if text != "<s> ":
@@ -86,12 +95,13 @@ def handle_sentence(sentence_node, number_of_words, counts):
             if number_of_words == 1:
                 n_gram = words[index]
             else:
-                n_gram = " ".join(words[index:index + number_of_words]) 
+                n_gram = " ".join(words[index:index + number_of_words])
             counts[n_gram] += 1
 
 
 def retrieve_text(node):
-    """ Extracts and concatenates text from XML nodes, adding start and end markers to each sentence.
+    """ Extracts and concatenates text from XML nodes, adding start and end 
+    markers to each sentence.
 
     Parameters:
     node (xml.etree.ElementTree.Element): The current node in the XML tree.
@@ -102,11 +112,12 @@ def retrieve_text(node):
     text = "<s> "
     for child in node:
         if child.tag == 'w':
-            text += child.text.lower()
+            if child.text:
+                text += child.text.lower()
         else:
             if len(node) > 0:
                 for grandchild in child:
-                    text += retrieve_text(grandchild) 
+                    text += retrieve_text(grandchild)
     return text
 
 
