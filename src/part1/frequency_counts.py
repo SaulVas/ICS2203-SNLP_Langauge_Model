@@ -54,7 +54,7 @@ def frequency_counts():
                 traverse_tree(child, number_of_words, n_gram_counts)
 
         with open(f'../n_grams/{number_of_words}_gram_counts.json', 'w', encoding='utf-8') as fp:
-            json.dump(n_gram_counts, fp)
+            json.dump(n_gram_counts, fp, indent=4)
 
 
 def traverse_tree(node, number_of_words, counts):
@@ -88,8 +88,9 @@ def handle_sentence(sentence_node, number_of_words, counts):
     Returns:
         None
     """
-    text = retrieve_text(sentence_node) + " </s>"
-    if text != "<s> ":
+    text = retrieve_text(sentence_node)
+    if text != "":
+        text ="<s> " + text + " </s>"
         words = text.split()
         for index in range(len(words) - number_of_words + 1):
             if number_of_words == 1:
@@ -109,7 +110,7 @@ def retrieve_text(node):
     Returns:
     str: The concatenated text from the node and its descendants.
     """
-    text = "<s> "
+    text = ""
     for child in node:
         if child.tag == 'w':
             if child.text:
