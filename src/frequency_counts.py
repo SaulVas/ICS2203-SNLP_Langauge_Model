@@ -35,7 +35,7 @@ def handle_sentence(sentence_node, number_of_words, counts):
         None
     """
     text = retrieve_text(sentence_node)
-    if text != "":
+    if text.strip() != "":
         text = "<s> " + text + " </s>"
         words = text.split()
         for index in range(len(words) - number_of_words + 1):
@@ -61,6 +61,8 @@ def retrieve_text(node):
         if child.tag == 'w':
             if child.text:
                 text += child.text.lower()
+        elif child.tag == 'c':
+            text += " "
         else:
             if len(node) > 0:
                 for grandchild in child:
