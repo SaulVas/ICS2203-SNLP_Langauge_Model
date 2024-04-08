@@ -23,7 +23,6 @@ for number_of_words in range(1, 4):
     with open(f'n_grams/corpus/{number_of_words}_gram_counts.json', 'w', encoding='utf-8') as fp:
         json.dump(n_gram_counts, fp, indent=4)
 
-
 # Splitting the corpus into train, validation, and test sets
 train = []
 validation = []

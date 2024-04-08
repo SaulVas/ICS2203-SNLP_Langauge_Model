@@ -1,20 +1,26 @@
 """
-This module provides a function for splitting a list of elements into 
-train, validation, and test sets.
+This module contains functions for splitting arrays into a training, 
+validation and test set and storing them in xml files.
+
+Author: [Saul Vassallo]
+Date: [8th april 2024]
 """
+
 import random
 import xml.etree.ElementTree as ET
-import os
 
 random.seed(42)
 
-def split_and_append_elements(s_elements, all_train_elements, all_validation_elements, all_test_elements):
+def split_and_append_elements(s_elements, training_set, validation_set, test_set):
     """
     Splits the given list of elements into train, validation, and test sets,
     and appends them to the respective global lists.
 
     Args:
         s_elements (list): The list of elements to be split.
+        training_set (list): The list to append the training set elements to.
+        validation_set (list): The list to append the validation set elements to.
+        test_set (list): The list to append the test set elements to.
 
     Returns:
         None
@@ -28,9 +34,9 @@ def split_and_append_elements(s_elements, all_train_elements, all_validation_ele
     validation_elements = s_elements[train_size:train_size+validation_size]
     test_elements = s_elements[train_size+validation_size:]
 
-    all_train_elements.extend(train_elements)
-    all_validation_elements.extend(validation_elements)
-    all_test_elements.extend(test_elements)
+    training_set.extend(train_elements)
+    validation_set.extend(validation_elements)
+    test_set.extend(test_elements)
 
 def write_xml_from_elements(elements, path):
     """
@@ -43,7 +49,7 @@ def write_xml_from_elements(elements, path):
     Returns:
         None
     """
-    new_root = ET.Element('root')
-    new_root.extend(elements)
-    new_tree = ET.ElementTree(new_root)
-    new_tree.write(path)
+    root = ET.Element('root')
+    root.extend(elements)
+    tree = ET.ElementTree(root)
+    tree.write(path)
