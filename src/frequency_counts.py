@@ -51,7 +51,8 @@ def frequency_counts():
             tree = ET.parse(path)
             root = tree.getroot()
             for child in root:
-                traverse_tree(child, number_of_words, n_gram_counts)
+                if child.tag != 'teiHeader':
+                    traverse_tree(child, number_of_words, n_gram_counts)
 
         with open(f'../n_grams/{number_of_words}_gram_counts.json', 'w', encoding='utf-8') as fp:
             json.dump(n_gram_counts, fp, indent=4)
@@ -69,12 +70,11 @@ def traverse_tree(node, number_of_words, counts):
     Returns:
         None
     """
-    if node.tag != 'teiHeader':
-        for child in node:
-            if child.tag == 's':
-                handle_sentence(child, number_of_words, counts)
-            else:
-                traverse_tree(child, number_of_words, counts)
+    for child in node:
+        if child.tag == 's':
+            handle_sentence(child, number_of_words, counts)
+        else:
+            traverse_tree(child, number_of_words, counts)
 
 
 def handle_sentence(sentence_node, number_of_words, counts):
