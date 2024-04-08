@@ -161,3 +161,8 @@ cython_debug/
 
 # MacOS Desktop Services Store
 **/.DS_Store
+
+# Data Sets
+data/test_set.xml
+data/training_set.xml
+data/validation_set.xml
