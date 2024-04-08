@@ -8,11 +8,7 @@ import os
 
 random.seed(42)
 
-all_train_elements = []
-all_validation_elements = []
-all_test_elements = []
-
-def split_and_append_elements(s_elements):
+def split_and_append_elements(s_elements, all_train_elements, all_validation_elements, all_test_elements):
     """
     Splits the given list of elements into train, validation, and test sets,
     and appends them to the respective global lists.
@@ -51,20 +47,3 @@ def write_xml_from_elements(elements, path):
     new_root.extend(elements)
     new_tree = ET.ElementTree(new_root)
     new_tree.write(path)
-
-directories = ['aca', 'dem', 'fic', 'news']
-BASE_PATH = '../../data/corpus_original/Texts/'
-
-for directory in directories:
-    dir_path = os.path.join(BASE_PATH, directory)
-    for file in os.listdir(dir_path):
-        if file.endswith('.xml'):
-            file_path = os.path.join(dir_path, file)
-            tree = ET.parse(file_path)
-            root = tree.getroot()
-            sentences = list(root.findall('.//s'))
-            split_and_append_elements(sentences)
-
-write_xml_from_elements(all_train_elements, '../../data/training_set.xml')
-write_xml_from_elements(all_validation_elements, '../../data/validation_set.xml')
-write_xml_from_elements(all_test_elements, '../../data/test_set.xml')
