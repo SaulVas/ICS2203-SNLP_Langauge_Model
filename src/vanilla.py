@@ -1,3 +1,6 @@
+"""
+Implementation of the Vanilla language model class
+"""
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 import json
@@ -7,28 +10,27 @@ from language_model import LanguageModel
 
 class VanillaLM(LanguageModel):
     """
-    A language model that generates n-gram counts and calculates probabilities.
+    Language model implementation using vanilla n-gram approach.
 
-    This class represents a language model that generates n-gram counts based on sentences
-    in a training set XML file. It calculates the probabilities of unigrams, bigrams, and
-    trigrams based on the generated counts.
-
-    Attributes:
-        uni_probabilities (defaultdict): A dictionary to store unigram probabilities.
-        bi_probabilities (defaultdict): A dictionary to store bigram probabilities.
-        tri_probabilities (defaultdict): A dictionary to store trigram probabilities.
-
-    Methods:
-        __init__(): Initializes the language model and loads existing 
-        n-gram counts or generates new ones.
-        __str__(): Returns a string representation of the language model.
-        generate_counts(): Generates n-gram counts and saves them to JSON files.
-        uni_gram_prob(): Calculates unigram probabilities.
-        bi_gram_prob(): Calculates bigram probabilities.
-        tri_gram_prob(): Calculates trigram probabilities.
+    This class inherits from the LanguageModel abstract base class and provides an implementation
+    for the _get_counts, _uni_gram_prob, _bi_gram_prob, and _tri_gram_prob methods.
     """
 
     def _get_counts(self):
+        """
+        Loads the n-gram counts from JSON files if they exist, otherwise generates the counts.
+
+        If the JSON files for 1-gram, 2-gram, and 3-gram counts exist in the 'n_grams/vanilla'
+        directory, this method loads the counts from the files and assigns them to the 
+        corresponding instance variables. If the files do not exist, it calls the 
+        '_generate_counts' method to generate the counts.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         if not (os.path.exists('n_grams/vanilla/1_gram_counts.json')
                 and os.path.exists('n_grams/vanilla/2_gram_counts.json')
                 and os.path.exists('n_grams/vanilla/3_gram_counts.json')):
@@ -116,6 +118,3 @@ class VanillaLM(LanguageModel):
             words = tuple(key.split())
             bi_gram_key = words[0] + " " + words[1]
             self.tri_probabilities[words] = self.tri_count[key] / self.bi_count[bi_gram_key]
-
-vanilla = VanillaLM()
-vanilla.text_generator("in")
