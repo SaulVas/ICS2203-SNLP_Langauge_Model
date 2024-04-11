@@ -1,6 +1,7 @@
 import string
 from collections import defaultdict
 from abc import ABC, abstractmethod
+import random
 
 class LanguageModel(ABC):
     def __init__(self):
@@ -59,16 +60,32 @@ class LanguageModel(ABC):
         words.insert(0, "<s>")
         if len(words) > 1:
             context = tuple(words[-2:])
-            while context[-1] not in ["</s>", ""]:
-                max_prob_found = 0
-                word = ""
+            loop_prevention_counter = 0
+            while context[-1] not in ["</s>", ""] and loop_prevention_counter < 100:
+                token_probabilities = {}
+
                 for key, value in self.tri_probabilities.items():
-                    if (key[0:2] == context) and value > max_prob_found:
-                        max_prob_found = value
-                        word = key[-1]
+                    if key[0:2] == context:
+                        token_probabilities[key[-1]] = value
+
+                if not token_probabilities:
+                    break
+
+                # semi-random selection of next word
+                random_dec = random.random()
+                probabilities_sum = 0
+                for token, probability in sorted(token_probabilities.items(),
+                                                 key=lambda item: item[1]):
+                    probabilities_sum += probability
+                    if probabilities_sum > random_dec:
+                        word = token
+                        break
 
                 words.append(word)
                 context = (context[-1], word)
-                print(context)
+                loop_prevention_counter += 1
+
+        if words[-1] != "</s>":
+            words.append("</s>")
 
         print(" ".join(words))

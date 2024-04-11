@@ -97,7 +97,7 @@ class VanillaLM(LanguageModel):
         """
         for key in self.bi_count:
             words = tuple(key.split())
-            self.bi_probabilities[words] = self.bi_count[key] / self.uni_count[words[-1]]
+            self.bi_probabilities[words] = self.bi_count[key] / self.uni_count[words[0]]
 
     def _tri_gram_prob(self):
         """
@@ -118,4 +118,4 @@ class VanillaLM(LanguageModel):
             self.tri_probabilities[words] = self.tri_count[key] / self.bi_count[bi_gram_key]
 
 vanilla = VanillaLM()
-vanilla.text_generator("to live")
+vanilla.text_generator("in")
