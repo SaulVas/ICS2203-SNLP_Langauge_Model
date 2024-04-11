@@ -153,3 +153,15 @@ class LanguageModel(ABC):
             words.append("</s>")
 
         print(" ".join(words))
+
+    @abstractmethod
+    def sentence_probability(self, sentence):
+        """
+        Calculate the probability of a given sentence according to the language model.
+
+        Parameters:
+            sentence (str): The input sentence for which the probability needs to be calculated.
+
+        Returns:
+            float: The probability of the given sentence according to the language model.
+        """

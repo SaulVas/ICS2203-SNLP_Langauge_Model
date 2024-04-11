@@ -6,7 +6,7 @@ from collections import defaultdict
 import json
 import os
 from frequency_counts import handle_sentence
-from language_model import LanguageModel
+from language_model_ABC import LanguageModel
 
 class VanillaLM(LanguageModel):
     """
@@ -118,3 +118,17 @@ class VanillaLM(LanguageModel):
             words = tuple(key.split())
             bi_gram_key = words[0] + " " + words[1]
             self.tri_probabilities[words] = self.tri_count[key] / self.bi_count[bi_gram_key]
+
+    def sentence_probability(self, sentence):
+        words = (["<s>", "<s>"] +
+                 self._remove_punctuation(sentence.lower().split()) +
+                 ["</s>", "</s>"])
+        minimum_probability = min(self.tri_probabilities.values())
+        sentence_probability = 1
+
+        for index in range(len(words) - 3):
+            trigram = tuple(words[index : index + 3])
+            prob = self.tri_probabilities.get(trigram, minimum_probability)
+            sentence_probability *= prob
+
+        print(f"The probability of this sentence occuring was approximately {sentence_probability}")
