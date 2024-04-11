@@ -27,7 +27,7 @@ class VanillaLM(LanguageModel):
         bi_gram_prob(): Calculates bigram probabilities.
         tri_gram_prob(): Calculates trigram probabilities.
     """
-    
+
     def _get_counts(self):
         if not (os.path.exists('n_grams/vanilla/1_gram_counts.json')
                 and os.path.exists('n_grams/vanilla/2_gram_counts.json')
@@ -97,7 +97,7 @@ class VanillaLM(LanguageModel):
         """
         for key in self.bi_count:
             words = tuple(key.split())
-            self.bi_probabilities = self.bi_count[key] / self.uni_count[words[-1]]
+            self.bi_probabilities[words] = self.bi_count[key] / self.uni_count[words[-1]]
 
     def _tri_gram_prob(self):
         """
@@ -115,4 +115,7 @@ class VanillaLM(LanguageModel):
         for key in self.tri_count:
             words = tuple(key.split())
             bi_gram_key = words[0] + " " + words[1]
-            self.tri_probabilities = self.tri_count[key] / self.bi_count[bi_gram_key]
+            self.tri_probabilities[words] = self.tri_count[key] / self.bi_count[bi_gram_key]
+
+vanilla = VanillaLM()
+vanilla.text_generator("to live")

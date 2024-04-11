@@ -36,7 +36,7 @@ def handle_sentence(sentence_node, number_of_words, counts):
     """
     text = retrieve_text(sentence_node)
     if text.strip() != "":
-        text = "<s> " + text + " </s>"
+        text = ("<s> " * (number_of_words - 1)) + text + ("</s> " * (number_of_words - 1))
         words = text.split()
         for index in range(len(words) - number_of_words + 1):
             if number_of_words == 1:

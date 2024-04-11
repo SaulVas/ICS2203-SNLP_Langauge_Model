@@ -52,4 +52,23 @@ class LanguageModel(ABC):
         text_without_punctuation = text.translate(str.maketrans("", "", punctuation))
 
         return text_without_punctuation
-    
+
+    def text_generator(self, phrase):
+        phrase = self._remove_punctuation(phrase)
+        words = phrase.lower().split()  # Convert to lowercase and split into words
+        words.insert(0, "<s>")
+        if len(words) > 1:
+            context = tuple(words[-2:])
+            while context[-1] not in ["</s>", ""]:
+                max_prob_found = 0
+                word = ""
+                for key, value in self.tri_probabilities.items():
+                    if (key[0:2] == context) and value > max_prob_found:
+                        max_prob_found = value
+                        word = key[-1]
+
+                words.append(word)
+                context = (context[-1], word)
+                print(context)
+
+        print(" ".join(words))
