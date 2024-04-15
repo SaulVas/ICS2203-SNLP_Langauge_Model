@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 import json
 import os
+import random
 from frequency_counts import handle_sentence
 from language_model_ABC import LanguageModel
 
@@ -15,6 +16,11 @@ class VanillaLM(LanguageModel):
     This class inherits from the LanguageModel abstract base class and provides an implementation
     for the _get_counts, _uni_gram_prob, _bi_gram_prob, and _tri_gram_prob methods.
     """
+    def __init__(self):
+        super().__init__()
+        self._uni_gram_prob()
+        self._bi_gram_prob()
+        self._tri_gram_prob()
 
     def _get_counts(self):
         """
@@ -119,11 +125,47 @@ class VanillaLM(LanguageModel):
             bi_gram_key = words[0] + " " + words[1]
             self.tri_probabilities[words] = self.tri_count[key] / self.bi_count[bi_gram_key]
 
+    def text_generator(self, phrase):
+        phrase = self._remove_punctuation(phrase)
+        words = phrase.lower().split()  # Convert to lowercase and split into words
+        words.insert(0, "<s>")
+        if len(words) > 1:
+            context = tuple(words[-2:])
+            loop_prevention_counter = 0
+            while context[-1] not in ["</s>", ""] and loop_prevention_counter < 100:
+                token_probabilities = {}
+
+                for key, value in self.tri_probabilities.items():
+                    if key[0:2] == context:
+                        token_probabilities[key[-1]] = value
+
+                if not token_probabilities:
+                    break
+
+                # semi-random selection of next word
+                random_dec = random.random()
+                probabilities_sum = 0
+                for token, probability in sorted(token_probabilities.items(),
+                                                 key=lambda item: item[1]):
+                    probabilities_sum += probability
+                    if probabilities_sum > random_dec:
+                        word = token
+                        break
+
+                words.append(word)
+                context = (context[-1], word)
+                loop_prevention_counter += 1
+
+        if words[-1] != "</s>":
+            words.append("</s>")
+
+        print(" ".join(words))
+
     def sentence_probability(self, sentence):
         words = (["<s>", "<s>"] +
                  self._remove_punctuation(sentence.lower().split()) +
                  ["</s>", "</s>"])
-        minimum_probability = min(self.tri_probabilities.values())
+        minimum_probability = 0
         sentence_probability = 1
 
         for index in range(len(words) - 3):

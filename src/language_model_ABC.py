@@ -39,14 +39,11 @@ class LanguageModel(ABC):
         self.uni_count = defaultdict(int)
         self.bi_count = defaultdict(int)
         self.tri_count = defaultdict(int)
-        self.uni_probabilities = defaultdict(int)
-        self.bi_probabilities = defaultdict(int)
-        self.tri_probabilities = defaultdict(int)
+        self.uni_probabilities = defaultdict(float)
+        self.bi_probabilities = defaultdict(float)
+        self.tri_probabilities = defaultdict(float)
 
         self._get_counts()
-        self._uni_gram_prob()
-        self._bi_gram_prob()
-        self._tri_gram_prob()
 
     def __str__(self):
         """
@@ -112,6 +109,7 @@ class LanguageModel(ABC):
 
         return text_without_punctuation
 
+    @abstractmethod
     def text_generator(self, phrase):
         """
         Generates text based on a given phrase using a language model.
@@ -119,40 +117,6 @@ class LanguageModel(ABC):
         Args:
             phrase (str): The input phrase to generate text from.
         """
-        phrase = self._remove_punctuation(phrase)
-        words = phrase.lower().split()  # Convert to lowercase and split into words
-        words.insert(0, "<s>")
-        if len(words) > 1:
-            context = tuple(words[-2:])
-            loop_prevention_counter = 0
-            while context[-1] not in ["</s>", ""] and loop_prevention_counter < 100:
-                token_probabilities = {}
-
-                for key, value in self.tri_probabilities.items():
-                    if key[0:2] == context:
-                        token_probabilities[key[-1]] = value
-
-                if not token_probabilities:
-                    break
-
-                # semi-random selection of next word
-                random_dec = random.random()
-                probabilities_sum = 0
-                for token, probability in sorted(token_probabilities.items(),
-                                                 key=lambda item: item[1]):
-                    probabilities_sum += probability
-                    if probabilities_sum > random_dec:
-                        word = token
-                        break
-
-                words.append(word)
-                context = (context[-1], word)
-                loop_prevention_counter += 1
-
-        if words[-1] != "</s>":
-            words.append("</s>")
-
-        print(" ".join(words))
 
     @abstractmethod
     def sentence_probability(self, sentence):
