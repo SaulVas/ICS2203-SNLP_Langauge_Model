@@ -2,7 +2,6 @@
 Implements an abstract base class for language models
 """
 import string
-import random
 from collections import defaultdict
 from abc import ABC, abstractmethod
 
