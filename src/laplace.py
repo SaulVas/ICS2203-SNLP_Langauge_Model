@@ -1,5 +1,5 @@
 """
-Implementation of th elaplace (add 1) language model.
+Implementation of the laplace (add 1) language model.
 """
 import xml.etree.ElementTree as ET
 from collections import defaultdict
@@ -16,9 +16,9 @@ class LaplaceLM(LanguageModel):
         """
         Loads the n-gram counts from JSON files if they exist, otherwise generates the counts.
 
-        If the JSON files for 1-gram, 2-gram, and 3-gram counts exist in the 'n_grams/vanilla'
-        directory, this method loads the counts from the files and assigns them to the 
-        corresponding instance variables. If the files do not exist, it calls the 
+        If the JSON files for 1-gram, 2-gram, and 3-gram counts exist in the 'n_grams/laplace'
+        directory, this method loads the counts from the files and assigns them to the
+        corresponding instance variables. If the files do not exist, it calls the
         '_generate_counts' method to generate the counts.
 
         Args:
@@ -31,13 +31,13 @@ class LaplaceLM(LanguageModel):
                 and os.path.exists('n_grams/laplace/2_gram_counts.json')
                 and os.path.exists('n_grams/laplace/3_gram_counts.json')):
             self._generate_counts()
-        else:
-            with open("n_grams/laplace/1_gram_counts.json", 'r', encoding='utf-8') as fp:
-                self.uni_count = json.load(fp)
-            with open("n_grams/laplace/2_gram_counts.json", 'r', encoding='utf-8') as fp:
-                self.bi_count = json.load(fp)
-            with open("n_grams/laplace/3_gram_counts.json", 'r', encoding='utf-8') as fp:
-                self.tri_count = json.load(fp)
+
+        with open("n_grams/laplace/1_gram_counts.json", 'r', encoding='utf-8') as fp:
+            self.uni_count = json.load(fp)
+        with open("n_grams/laplace/2_gram_counts.json", 'r', encoding='utf-8') as fp:
+            self.bi_count = json.load(fp)
+        with open("n_grams/laplace/3_gram_counts.json", 'r', encoding='utf-8') as fp:
+            self.tri_count = json.load(fp)
 
     def _generate_counts(self):
         """

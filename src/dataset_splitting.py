@@ -11,31 +11,28 @@ import xml.etree.ElementTree as ET
 
 random.seed(42)
 
-def split_and_append_elements(s_elements, training_set, validation_set, test_set):
+def split_and_append_elements(s_elements, training_set, test_set):
     """
-    Splits the given list of elements into train, validation, and test sets,
+    Splits the given list of elements into train, test, and test sets,
     and appends them to the respective global lists.
 
     Args:
         s_elements (list): The list of elements to be split.
         training_set (list): The list to append the training set elements to.
-        validation_set (list): The list to append the validation set elements to.
+        test_set (list): The list to append the test set elements to.
         test_set (list): The list to append the test set elements to.
 
     Returns:
         None
     """
     total_elements = len(s_elements)
-    train_size = int(total_elements * 0.7)
-    validation_size = int(total_elements * 0.2)
+    train_size = int(total_elements * 0.8)
 
     random.shuffle(s_elements)
     train_elements = s_elements[:train_size]
-    validation_elements = s_elements[train_size:train_size+validation_size]
-    test_elements = s_elements[train_size+validation_size:]
+    test_elements = s_elements[train_size:]
 
     training_set.extend(train_elements)
-    validation_set.extend(validation_elements)
     test_set.extend(test_elements)
 
 def write_xml_from_elements(elements, path):

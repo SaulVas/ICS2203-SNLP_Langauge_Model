@@ -44,6 +44,9 @@ class LanguageModel(ABC):
         self.tri_probabilities = defaultdict(float)
 
         self._get_counts()
+        self._uni_gram_prob()
+        self._bi_gram_prob()
+        self._tri_gram_prob()
 
     def __str__(self):
         """

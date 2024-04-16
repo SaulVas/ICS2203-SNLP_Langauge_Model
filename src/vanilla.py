@@ -15,12 +15,6 @@ class VanillaLM(LanguageModel):
     This class inherits from the LanguageModel abstract base class and provides an implementation
     for the _get_counts, _uni_gram_prob, _bi_gram_prob, and _tri_gram_prob methods.
     """
-    def __init__(self):
-        super().__init__()
-        self._uni_gram_prob()
-        self._bi_gram_prob()
-        self._tri_gram_prob()
-
     def _defualt_uni_value(self):
         return float
 

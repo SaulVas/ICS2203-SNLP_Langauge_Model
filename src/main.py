@@ -34,7 +34,6 @@ if not (os.path.exists(TRAIN_FILE_PATH)
         and os.path.exists(TEST_FILE_PATH)):
 # Splitting the corpus into train, validation, and test sets if not already created
     train = []
-    validation = []
     test = []
 
     for directory in directories:
@@ -45,7 +44,7 @@ if not (os.path.exists(TRAIN_FILE_PATH)
                 tree = ET.parse(file_path)
                 root = tree.getroot()
                 sentences = list(root.findall('.//s'))
-                split_and_append_elements(sentences, train, validation, test)
+                split_and_append_elements(sentences, train, test)
 
     if os.path.exists(TRAIN_FILE_PATH):
         os.remove(TRAIN_FILE_PATH)
@@ -54,5 +53,4 @@ if not (os.path.exists(TRAIN_FILE_PATH)
     if os.path.exists(TEST_FILE_PATH):
         os.remove(TEST_FILE_PATH)
     write_xml_from_elements(train, TRAIN_FILE_PATH)
-    write_xml_from_elements(validation, VALIDATION_FILE_PATH)
     write_xml_from_elements(test, TEST_FILE_PATH)
