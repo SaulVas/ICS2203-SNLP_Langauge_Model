@@ -39,7 +39,7 @@ class LanguageModel(ABC):
         self.uni_count = defaultdict(int)
         self.bi_count = defaultdict(int)
         self.tri_count = defaultdict(int)
-        self.uni_probabilities = defaultdict(float)
+        self.uni_probabilities = defaultdict(self._defualt_uni_value)
         self.bi_probabilities = defaultdict(float)
         self.tri_probabilities = defaultdict(float)
 
@@ -56,6 +56,10 @@ class LanguageModel(ABC):
                 + f"bi_count has {len(self.bi_count.keys())} tokens\n"
                 + f"tri_count has {len(self.tri_count.keys())} tokens\n")
         return ret_str
+
+    @abstractmethod
+    def _defualt_uni_value(self):
+        """"""
 
     @abstractmethod
     def _get_counts(self):
@@ -157,7 +161,6 @@ class LanguageModel(ABC):
 
         print(" ".join(words))
 
-    @abstractmethod
     def sentence_probability(self, sentence):
         """
         Calculate the probability of a given sentence according to the language model.
@@ -168,3 +171,15 @@ class LanguageModel(ABC):
         Returns:
             float: The probability of the given sentence according to the language model.
         """
+        words = self._remove_punctuation(sentence.lower())
+        words = ["<s>", "<s>"] + words.split() + ["</s>", "</s>"]
+        sentence_probability = 1
+
+        for index in range(len(words) - 3):
+            trigram = tuple(words[index : index + 3])
+            prob = self._linear_interpolation(trigram)
+            sentence_probability *= prob
+
+        print("The probability of the sentence:")
+        print(" ".join(words))
+        print(f"occuring was approximately {sentence_probability}")

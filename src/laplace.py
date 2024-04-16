@@ -9,6 +9,9 @@ from frequency_counts import handle_sentence
 from language_model_abc import LanguageModel
 
 class LaplaceLM(LanguageModel):
+    def _defualt_uni_value(self):
+        return float(1 / sum(self.uni_count.values()) + len(self.uni_count))
+
     def _get_counts(self):
         """
         Loads the n-gram counts from JSON files if they exist, otherwise generates the counts.
@@ -64,33 +67,33 @@ class LaplaceLM(LanguageModel):
     def _uni_gram_prob(self):
         total_tokens = float(sum(self.uni_count.values()))
         for key in self.uni_count:
-            self.uni_probabilities[key] = (self.uni_count[key] + 1
-                                           / total_tokens + len(self.uni_count))
+            self.uni_probabilities[key] = ((self.uni_count[key] + 1)
+                                           / (total_tokens + len(self.uni_count)))
 
     def _bi_gram_prob(self):
         for key in self.bi_count:
             words = tuple(key.split())
-            self.bi_probabilities[words] = (self.bi_count[words] + 1
-                                            / self.uni_count[words[0]] + len(self.uni_count))
-
+            self.bi_probabilities[words] = ((self.bi_count[words] + 1)
+                                            / (self.uni_count[words[0]] + len(self.uni_count)))
 
     def _tri_gram_prob(self):
         for key in self.tri_count:
-            words = tuple(key.split)
+            words = tuple(key.split())
             bi_gram_key = words[0] + " " + words[1]
-            self.tri_probabilities[words] = (self.tri_count[words] + 1
-                                             / self.bi_count[bi_gram_key] + len(self.uni_count))
+            self.tri_probabilities[words] = ((self.tri_count[words] + 1)
+                                             / (self.bi_count[bi_gram_key] + len(self.uni_count)))
 
-    def sentence_probability(self, sentence):
-        words = (["<s>", "<s>"]
-                 + self._remove_punctuation(sentence.lower().split())
-                 + ["</s>", "</s>"])
-        sentence_probability = 1
+    def _linear_interpolation(self, trigram):
+        uni_prob = 0.1 * self.uni_probabilities[trigram[0]]
 
-        for index in range(len(words) - 3):
-            trigram = tuple(words[index : index + 3])
-            prob = (self.tri_count[trigram] + 1.0
-                    / self.bi_count[trigram[: 2]] + len(self.uni_count))
-            sentence_probability *= prob
+        bi_prob = 0.3 * self.bi_probabilities.get(trigram[:2],
+                                                  1
+                                                  / (self.uni_count.get(trigram[0], 1)
+                                                     + len(self.uni_count)))
 
-        print(f"The probability of this sentence occuring was approximately {sentence_probability}")
+        tri_prob = 0.6 * self.tri_probabilities.get(trigram,
+                                                    1
+                                                    / (self.bi_count.get(trigram[:2], 1)
+                                                       + len(self.uni_count)))
+
+        return uni_prob + bi_prob + tri_prob

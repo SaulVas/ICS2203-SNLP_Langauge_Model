@@ -21,6 +21,9 @@ class VanillaLM(LanguageModel):
         self._bi_gram_prob()
         self._tri_gram_prob()
 
+    def _defualt_uni_value(self):
+        return float
+
     def _get_counts(self):
         """
         Loads the n-gram counts from JSON files if they exist, otherwise generates the counts.
@@ -125,23 +128,9 @@ class VanillaLM(LanguageModel):
             self.tri_probabilities[words] = self.tri_count[key] / self.bi_count[bi_gram_key]
 
     def _linear_interpolation(self, trigram):
-        return (0.6 * self.tri_probabilities[trigram]
-                + 0.3 * self.bi_probabilities[trigram[: 2]]
-                + 0.1 * self.uni_probabilities[trigram[0]])
-
-    def sentence_probability(self, sentence):
-        words = self._remove_punctuation(sentence.lower())
-        words = ["<s>", "<s>"] + words.split() + ["</s>", "</s>"]
-        sentence_probability = 1
-
-        for index in range(len(words) - 3):
-            trigram = tuple(words[index : index + 3])
-            prob = self._linear_interpolation(trigram)
-            sentence_probability *= prob
-
-        print("The probability of the sentence:")
-        print(" ".join(words))
-        print(f"occuring was approximately {sentence_probability}")
-
+        return ((0.6 * self.tri_probabilities[trigram])
+                + (0.3 * self.bi_probabilities[trigram[: 2]])
+                + (0.1 * self.uni_probabilities[trigram[0]])
+)
 vanilla = VanillaLM()
 vanilla.sentence_probability("siegler is a fucking faggot")
