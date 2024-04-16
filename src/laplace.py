@@ -6,7 +6,7 @@ from collections import defaultdict
 import json
 import os
 from frequency_counts import handle_sentence
-from language_model_ABC import LanguageModel
+from language_model_abc import LanguageModel
 
 class LaplaceLM(LanguageModel):
     def _get_counts(self):

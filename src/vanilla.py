@@ -5,9 +5,8 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 import json
 import os
-import random
 from frequency_counts import handle_sentence
-from language_model_ABC import LanguageModel
+from language_model_abc import LanguageModel
 
 class VanillaLM(LanguageModel):
     """
@@ -125,52 +124,24 @@ class VanillaLM(LanguageModel):
             bi_gram_key = words[0] + " " + words[1]
             self.tri_probabilities[words] = self.tri_count[key] / self.bi_count[bi_gram_key]
 
-    def text_generator(self, phrase):
-        phrase = self._remove_punctuation(phrase)
-        words = phrase.lower().split()  # Convert to lowercase and split into words
-        words.insert(0, "<s>")
-        if len(words) > 1:
-            context = tuple(words[-2:])
-            loop_prevention_counter = 0
-            while context[-1] not in ["</s>", ""] and loop_prevention_counter < 100:
-                token_probabilities = {}
-
-                for key, value in self.tri_probabilities.items():
-                    if key[0:2] == context:
-                        token_probabilities[key[-1]] = value
-
-                if not token_probabilities:
-                    break
-
-                # semi-random selection of next word
-                random_dec = random.random()
-                probabilities_sum = 0
-                for token, probability in sorted(token_probabilities.items(),
-                                                 key=lambda item: item[1]):
-                    probabilities_sum += probability
-                    if probabilities_sum > random_dec:
-                        word = token
-                        break
-
-                words.append(word)
-                context = (context[-1], word)
-                loop_prevention_counter += 1
-
-        if words[-1] != "</s>":
-            words.append("</s>")
-
-        print(" ".join(words))
+    def _linear_interpolation(self, trigram):
+        return (0.6 * self.tri_probabilities[trigram]
+                + 0.3 * self.bi_probabilities[trigram[: 2]]
+                + 0.1 * self.uni_probabilities[trigram[0]])
 
     def sentence_probability(self, sentence):
-        words = (["<s>", "<s>"] +
-                 self._remove_punctuation(sentence.lower().split()) +
-                 ["</s>", "</s>"])
-        minimum_probability = 0
+        words = self._remove_punctuation(sentence.lower())
+        words = ["<s>", "<s>"] + words.split() + ["</s>", "</s>"]
         sentence_probability = 1
 
         for index in range(len(words) - 3):
             trigram = tuple(words[index : index + 3])
-            prob = self.tri_probabilities.get(trigram, minimum_probability)
+            prob = self._linear_interpolation(trigram)
             sentence_probability *= prob
 
-        print(f"The probability of this sentence occuring was approximately {sentence_probability}")
+        print("The probability of the sentence:")
+        print(" ".join(words))
+        print(f"occuring was approximately {sentence_probability}")
+
+vanilla = VanillaLM()
+vanilla.sentence_probability("siegler is a fucking faggot")

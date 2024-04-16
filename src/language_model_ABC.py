@@ -2,6 +2,7 @@
 Implements an abstract base class for language models
 """
 import string
+import random
 from collections import defaultdict
 from abc import ABC, abstractmethod
 
@@ -109,6 +110,9 @@ class LanguageModel(ABC):
         return text_without_punctuation
 
     @abstractmethod
+    def _linear_interpolation(self, trigram):
+        """"""
+
     def text_generator(self, phrase):
         """
         Generates text based on a given phrase using a language model.
@@ -116,6 +120,42 @@ class LanguageModel(ABC):
         Args:
             phrase (str): The input phrase to generate text from.
         """
+        phrase = self._remove_punctuation(phrase)
+        words = phrase.lower().split()
+        words.insert(0, "<s>")
+
+        if len(words) > 1:
+            context = tuple(words[-2:])
+            loop_prevention_counter = 0
+
+            while context[-1] not in ["</s>", ""] and loop_prevention_counter < 100:
+                token_probabilities = {}
+
+                for key in self.tri_probabilities:
+                    if key[0:2] == context:
+                        token_probabilities[key[-1]] = self._linear_interpolation(key)
+
+                if not token_probabilities:
+                    break
+
+                # semi-random selection of next word
+                random_dec = random.random()
+                probabilities_sum = 0
+                for token, probability in sorted(token_probabilities.items(),
+                                                 key=lambda item: item[1]):
+                    probabilities_sum += probability
+                    if probabilities_sum > random_dec:
+                        word = token
+                        break
+
+                words.append(word)
+                context = (context[-1], word)
+                loop_prevention_counter += 1
+
+        if words[-1] != "</s>":
+            words.append("</s>")
+
+        print(" ".join(words))
 
     @abstractmethod
     def sentence_probability(self, sentence):
