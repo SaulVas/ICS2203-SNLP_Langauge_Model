@@ -1,0 +1,20 @@
+{
+    "vanilla": [
+        Infinity,
+        Infinity,
+        Infinity,
+        Infinity
+    ],
+    "laplace": [
+        Infinity,
+        Infinity,
+        Infinity,
+        Infinity
+    ],
+    "unk": [
+        Infinity,
+        Infinity,
+        Infinity,
+        Infinity
+    ]
+}

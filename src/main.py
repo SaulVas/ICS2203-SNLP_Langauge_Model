@@ -2,8 +2,11 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 import json
 import os
-from frequency_counts import traverse_tree, retrieve_text
-from dataset_management import split_and_append_elements, write_xml_from_elements
+from dataset_functions import (traverse_tree,
+                               retrieve_text,
+                               split_and_append_elements,
+                               write_xml_from_elements,
+                               model_perplexity)
 from vanilla import VanillaLM
 from laplace import LaplaceLM
 from unk import UnkLM
@@ -54,7 +57,7 @@ if not (os.path.exists(TRAIN_FILE_PATH)
     write_xml_from_elements(train, TRAIN_FILE_PATH)
     write_xml_from_elements(test, TEST_FILE_PATH)
 
-Vanilla = VanillaLM()
+vanilla = VanillaLM()
 laplace = LaplaceLM()
 unk = UnkLM()
 
@@ -64,12 +67,11 @@ root = test_tree.getroot()
 for child in root:
     test_sentences.append(retrieve_text(child))
 
-# Vanilla
-total_uni_log_prob = 0
-total_bi_log_prob = 0
-total_tri_log_prob = 0
-    
-    
-# Laplace
-    
-# Unk
+perplexities = {}
+
+perplexities["vanilla"] = model_perplexity(vanilla, test_sentences)
+perplexities["laplace"] = model_perplexity(laplace, test_sentences)
+perplexities["unk"] = model_perplexity(unk, test_sentences)
+
+with open('../documentation/perplexity.json', 'w', encoding='utf-8') as fp:
+    json.dump(perplexities, fp, indent=4)

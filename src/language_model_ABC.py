@@ -8,7 +8,7 @@ from collections import defaultdict
 import json
 import os
 from abc import ABC, abstractmethod
-from frequency_counts import handle_sentence
+from dataset_functions import handle_sentence
 
 class LanguageModel(ABC):
     """
@@ -35,7 +35,6 @@ class LanguageModel(ABC):
         _remove_punctuation(text): Removes punctuation from the given text.
         text_generator(phrase): Generates text based on a given phrase using the language model.
     """
-
     def __init__(self):
         """
         Initializes the language model and calculates the counts and probabilities.

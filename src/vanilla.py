@@ -11,7 +11,7 @@ class VanillaLM(LanguageModel):
     for the _get_counts, _generate_unigram_probs, _generate_bigram_probs, and _generate_trigram_probs methods.
     """
     def _default_uni_value(self):
-        return float
+        return 0.0
 
     def _generate_unigram_probs(self):
         """

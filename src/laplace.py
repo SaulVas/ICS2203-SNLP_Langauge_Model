@@ -13,23 +13,25 @@ class LaplaceLM(LanguageModel):
             self.uni_probabilities[key] = ((self.uni_count[key] + 1)
                                            / (total_tokens + len(self.uni_count)))
 
-    def _generate_bigram_prob(self):
+    def _generate_bigram_probs(self):
         for key in self.bi_count:
             words = tuple(key.split())
-            self.bi_probabilities[words] = ((self.bi_count[words] + 1)
+            self.bi_probabilities[words] = ((self.bi_count[key] + 1)
                                             / (self.uni_count[words[0]] + len(self.uni_count)))
 
     def _generate_trigram_probs(self):
         for key in self.tri_count:
             words = tuple(key.split())
             bi_gram_key = words[0] + " " + words[1]
-            self.tri_probabilities[words] = ((self.tri_count[words] + 1)
+            self.tri_probabilities[words] = ((self.tri_count[key] + 1)
                                              / (self.bi_count[bi_gram_key] + len(self.uni_count)))
 
     def _get_bigram_probability(self, bigram):
         return self.bi_probabilities.get(bigram,
-                                         1 / (self.uni_count.get(bigram[0], 1) + len(self.uni_count)))
+                                         1 / (self.uni_count.get(bigram[0], 1)
+                                              + len(self.uni_count)))
 
     def _get_trigram_probability(self, trigram):
         return self.tri_probabilities.get(trigram,
-                                          1 / (self.bi_count.get(trigram[:2], 1) + len(self.uni_count)))
+                                          1 / (self.bi_count.get(trigram[:2], 1)
+                                               + len(self.uni_count)))
