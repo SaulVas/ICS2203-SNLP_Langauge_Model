@@ -68,8 +68,7 @@ for child in root:
 total_uni_log_prob = 0
 total_bi_log_prob = 0
 total_tri_log_prob = 0
-for sentence in test_sentences:
-
+    
     
 # Laplace
     
