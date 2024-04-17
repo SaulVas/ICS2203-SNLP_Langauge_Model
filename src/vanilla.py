@@ -8,12 +8,12 @@ class VanillaLM(LanguageModel):
     Language model implementation using vanilla n-gram approach.
 
     This class inherits from the LanguageModel abstract base class and provides an implementation
-    for the _get_counts, _uni_gram_prob, _bi_gram_prob, and _tri_gram_prob methods.
+    for the _get_counts, _generate_unigram_probs, _generate_bigram_probs, and _generate_trigram_probs methods.
     """
     def _default_uni_value(self):
         return float
 
-    def _uni_gram_prob(self):
+    def _generate_unigram_probs(self):
         """
         Calculates unigram probabilities.
 
@@ -29,7 +29,7 @@ class VanillaLM(LanguageModel):
         for key in self.uni_count:
             self.uni_probabilities[key] = self.uni_count[key] / total_tokens
 
-    def _bi_gram_prob(self):
+    def _generate_bigram_probs(self):
         """
         Calculates bigram probabilities.
 
@@ -46,7 +46,7 @@ class VanillaLM(LanguageModel):
             words = tuple(key.split())
             self.bi_probabilities[words] = self.bi_count[key] / self.uni_count[words[0]]
 
-    def _tri_gram_prob(self):
+    def _generate_trigram_probs(self):
         """
         Calculates trigram probabilities.
 
@@ -64,33 +64,8 @@ class VanillaLM(LanguageModel):
             bi_gram_key = words[0] + " " + words[1]
             self.tri_probabilities[words] = self.tri_count[key] / self.bi_count[bi_gram_key]
 
-    def _linear_interpolation(self, trigram):
-        return ((0.6 * self.tri_probabilities[trigram])
-                + (0.3 * self.bi_probabilities[trigram[-2:]])
-                + (0.1 * self.uni_probabilities[trigram[-1]]))
+    def _get_bigram_probability(self, bigram):
+        return self.bi_probabilities[bigram]
 
-    def text_generator(self, words):
-        words = self._remove_punctuation(words)
-        words = words.lower().split()
-        words.insert(0, "<s>")
-        return super().text_generator(words)
-
-    def sentence_probability(self, words):
-        words = self._remove_punctuation(words.lower())
-        words = ["<s>", "<s>"] + words.split() + ["</s>"]
-        return super().sentence_probability(words)
-
-    def uni_sentence_probability(self, words):
-        words = self._remove_punctuation(words.lower())
-        words = words.split()
-        return super().uni_sentence_probability(words)
-
-    def bi_sentence_probability(self, words):
-        words = self._remove_punctuation(words.lower())
-        words = ["<s>"] + words.split() + ["</s>"]
-        return super().bi_sentence_probability(words)
-
-    def tri_sentence_probability(self, words):
-        words = self._remove_punctuation(words.lower())
-        words = ["<s>", "<s>"] + words.split() + ["</s>"]
-        return super().tri_sentence_probability(words)
+    def _get_trigram_probability(self, trigram):
+        return self.tri_probabilities[trigram]

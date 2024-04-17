@@ -29,9 +29,9 @@ class LanguageModel(ABC):
         __init__(): Initializes the language model and calculates the counts and probabilities.
         __str__(): Returns a string representation of the language model.
         _get_counts(): Loads or generates the n-gram counts.
-        _uni_gram_prob(): Calculates the unigram probabilities.
-        _bi_gram_prob(): Calculates the bigram probabilities.
-        _tri_gram_prob(): Calculates the trigram probabilities.
+        _generate_unigram_probs(): Calculates the unigram probabilities.
+        _generate_bigram_probs(): Calculates the bigram probabilities.
+        _generate_trigram_probs(): Calculates the trigram probabilities.
         _remove_punctuation(text): Removes punctuation from the given text.
         text_generator(phrase): Generates text based on a given phrase using the language model.
     """
@@ -48,9 +48,9 @@ class LanguageModel(ABC):
         self.tri_probabilities = defaultdict(float)
 
         self._get_counts()
-        self._uni_gram_prob()
-        self._bi_gram_prob()
-        self._tri_gram_prob()
+        self._generate_unigram_probs()
+        self._generate_bigram_probs()
+        self._generate_trigram_probs()
 
     def __str__(self):
         """
@@ -121,7 +121,7 @@ class LanguageModel(ABC):
                 json.dump(n_gram_counts, fp, indent=4)
 
     @abstractmethod
-    def _uni_gram_prob(self):
+    def _generate_unigram_probs(self):
         """
         Calculates unigram probabilities.
 
@@ -129,7 +129,7 @@ class LanguageModel(ABC):
         """
 
     @abstractmethod
-    def _bi_gram_prob(self):
+    def _generate_bigram_probs(self):
         """
         Calculates bigram probabilities.
 
@@ -138,7 +138,7 @@ class LanguageModel(ABC):
         """
 
     @abstractmethod
-    def _tri_gram_prob(self):
+    def _generate_trigram_probs(self):
         """
         Calculates trigram probabilities.
 
@@ -162,10 +162,19 @@ class LanguageModel(ABC):
         return text_without_punctuation
 
     @abstractmethod
-    def _linear_interpolation(self, trigram):
+    def _get_bigram_probability(self, bigram):
         """"""
 
     @abstractmethod
+    def _get_trigram_probability(self, trigram):
+        """"""
+
+    def _linear_interpolation(self, trigram):
+        uni_prob = 0.1 * self.uni_probabilities[trigram[-1]]
+        bi_prob = 0.3 * self._get_bigram_probability(trigram[-2:])
+        tri_prob = 0.6 * self._get_trigram_probability(trigram)
+        return uni_prob + bi_prob + tri_prob
+
     def text_generator(self, words):
         """
         Generates text based on a given phrase using a language model.
@@ -173,6 +182,11 @@ class LanguageModel(ABC):
         Args:
             phrase (str): The input phrase to generate text from.
         """
+        if not isinstance(words, list):
+            words = self._remove_punctuation(words)
+            words = words.lower().split()
+            words.insert(0, "<s>")
+
         if len(words) > 1:
             context = tuple(words[-2:])
             loop_prevention_counter = 0
@@ -206,8 +220,11 @@ class LanguageModel(ABC):
 
         print(" ".join(words))
 
-    @abstractmethod
     def uni_sentence_probability(self, words):
+        if not isinstance(words, list):
+            words = self._remove_punctuation(words.lower())
+            words = words.split()
+
         sentence_probability = 1
         for unigram in words:
             prob = self.uni_probabilities[unigram]
@@ -215,27 +232,32 @@ class LanguageModel(ABC):
 
         return sentence_probability
 
-    @abstractmethod
     def bi_sentence_probability(self, words):
+        if not isinstance(words, list):
+            words = self._remove_punctuation(words.lower())
+            words = ["<s>"] + words.split() + ["</s>"]
+
         sentence_probability = 1
         for index in range(len(words) - 2):
             bigram = tuple(words[index : index+2])
-            prob = self.uni_probabilities[bigram]
+            prob = self._get_bigram_probability(bigram)
             sentence_probability *= prob
 
         return sentence_probability
 
-    @abstractmethod
     def tri_sentence_probability(self, words):
+        if not isinstance(words, list):
+            words = self._remove_punctuation(words.lower())
+            words = ["<s>", "<s>"] + words.split() + ["</s>"]
+
         sentence_probability = 1
         for index in range(len(words) - 3):
             trigram = tuple(words[index : index+3])
-            prob = self.uni_probabilities[trigram]
+            prob = self._get_trigram_probability(trigram)
             sentence_probability *= prob
 
         return sentence_probability
 
-    @abstractmethod
     def sentence_probability(self, words):
         """
         Calculate the probability of a given sentence according to the language model.
@@ -246,6 +268,10 @@ class LanguageModel(ABC):
         Returns:
             float: The probability of the given sentence according to the language model.
         """
+        if not isinstance(words, list):
+            words = self._remove_punctuation(words.lower())
+            words = ["<s>", "<s>"] + words.split() + ["</s>"]
+
         sentence_probability = 1
         for index in range(len(words) - 3):
             trigram = tuple(words[index : index+3])
