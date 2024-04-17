@@ -36,7 +36,7 @@ def handle_sentence(sentence_node, number_of_words, counts):
     """
     text = retrieve_text(sentence_node)
     if text.strip() != "":
-        text = ("<s> " * number_of_words) + text + (" </s>" * number_of_words)
+        text = ("<s> " * number_of_words) + text + (" </s>")
         words = text.split()
         for index in range(len(words) - number_of_words + 1):
             if number_of_words == 1:
@@ -45,6 +45,30 @@ def handle_sentence(sentence_node, number_of_words, counts):
                 n_gram = " ".join(words[index:index + number_of_words])
             counts[n_gram] += 1
 
+def handle_sentence_unk(sentence_node, number_of_words, counts, unknown_tokens):
+    """ Processes each sentence to compute and update n-gram frequencies.
+
+    Parameters:
+    sentence_node (xml.etree.ElementTree.Element): The current sentence node in the XML tree.
+    number_of_words (int): The number of words in the n-grams to be counted.
+    counts (collections.defaultdict): A dictionary to store the n-gram counts.
+    
+    Returns:
+        None
+    """
+    text = retrieve_text(sentence_node)
+    if text.strip() != "":
+        text = ("<s> " * number_of_words) + text + (" </s>")
+        words = text.split()
+        for index in range(len(words) - number_of_words + 1):
+            if words[index] in unknown_tokens:
+                words[index] = "<UNK>"
+                print("set UNK")
+            if number_of_words == 1:
+                n_gram = words[index]
+            else:
+                n_gram = " ".join(words[index:index + number_of_words])
+            counts[n_gram] += 1
 
 def retrieve_text(node):
     """ Extracts and concatenates text from XML nodes, adding start and end 

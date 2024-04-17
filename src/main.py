@@ -3,7 +3,7 @@ from collections import defaultdict
 import json
 import os
 from frequency_counts import traverse_tree
-from dataset_splitting import split_and_append_elements, write_xml_from_elements
+from dataset_management import split_and_append_elements, write_xml_from_elements
 
 # Creating n_gram counts for the entire corpus
 directories = ['aca', 'dem', 'fic', 'news']

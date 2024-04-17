@@ -5,8 +5,9 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 import json
 import os
-from frequency_counts import handle_sentence
 from language_model_abc import LanguageModel
+from frequency_counts import handle_sentence, handle_sentence_unk
+
 
 class Unk(LanguageModel):
     def _defualt_uni_value(self):
@@ -59,18 +60,30 @@ class Unk(LanguageModel):
         for child in root:
             handle_sentence(child, 1, n_gram_counts)
 
-        # Set threshold for unknown and go through training
-        # corpus changing words below threshold to <UNK>
-        # ...
+        unknown_tokens = {key for key, count in n_gram_counts.items() if count < 2}
 
         # Generate real counts:
         for number_of_words in range(1, 4):
             n_gram_counts = defaultdict(int)
-            tree = ET.parse('../data/training_set.xml')
-            root = tree.getroot()
             for child in root:
-                handle_sentence(child, number_of_words, n_gram_counts)
+                handle_sentence_unk(child, number_of_words, n_gram_counts, unknown_tokens)
 
             with open(f'n_grams/unk/{number_of_words}_gram_counts.json',
                     'w', encoding='utf-8') as fp:
                 json.dump(n_gram_counts, fp, indent=4)
+
+        print(self.uni_count["<UNK>"])
+
+    def _uni_gram_prob(self):
+        pass
+
+    def _bi_gram_prob(self):
+        pass
+
+    def _tri_gram_prob(self):
+        pass
+
+    def _linear_interpolation(self, trigram):
+        pass
+
+unk = Unk()
