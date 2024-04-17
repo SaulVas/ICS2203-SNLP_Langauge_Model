@@ -10,7 +10,7 @@ class VanillaLM(LanguageModel):
     This class inherits from the LanguageModel abstract base class and provides an implementation
     for the _get_counts, _uni_gram_prob, _bi_gram_prob, and _tri_gram_prob methods.
     """
-    def _defualt_uni_value(self):
+    def _default_uni_value(self):
         return float
 
     def _uni_gram_prob(self):
@@ -68,17 +68,29 @@ class VanillaLM(LanguageModel):
         return ((0.6 * self.tri_probabilities[trigram])
                 + (0.3 * self.bi_probabilities[trigram[-2:]])
                 + (0.1 * self.uni_probabilities[trigram[-1]]))
-    
+
     def text_generator(self, words):
         words = self._remove_punctuation(words)
         words = words.lower().split()
         words.insert(0, "<s>")
         return super().text_generator(words)
-    
+
     def sentence_probability(self, words):
         words = self._remove_punctuation(words.lower())
-        words = ["<s>", "<s>"] + words.split() + ["</s>", "</s>"]
+        words = ["<s>", "<s>"] + words.split() + ["</s>"]
         return super().sentence_probability(words)
 
-vanilla = VanillaLM()
-vanilla.sentence_probability("siegler is a fucking faggot")
+    def uni_sentence_probability(self, words):
+        words = self._remove_punctuation(words.lower())
+        words = words.split()
+        return super().uni_sentence_probability(words)
+
+    def bi_sentence_probability(self, words):
+        words = self._remove_punctuation(words.lower())
+        words = ["<s>"] + words.split() + ["</s>"]
+        return super().bi_sentence_probability(words)
+
+    def tri_sentence_probability(self, words):
+        words = self._remove_punctuation(words.lower())
+        words = ["<s>", "<s>"] + words.split() + ["</s>"]
+        return super().tri_sentence_probability(words)

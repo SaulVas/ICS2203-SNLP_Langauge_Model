@@ -4,7 +4,7 @@ Implementation of the laplace (add 1) language model.
 from language_model_abc import LanguageModel
 
 class LaplaceLM(LanguageModel):
-    def _defualt_uni_value(self):
+    def _default_uni_value(self):
         return float(1 / sum(self.uni_count.values()) + len(self.uni_count))
 
     def _uni_gram_prob(self):
@@ -40,14 +40,14 @@ class LaplaceLM(LanguageModel):
                                                        + len(self.uni_count)))
 
         return uni_prob + bi_prob + tri_prob
-    
+
     def text_generator(self, words):
         words = self._remove_punctuation(words)
         words = words.lower().split()
         words.insert(0, "<s>")
         return super().text_generator(words)
-    
+
     def sentence_probability(self, words):
         words = self._remove_punctuation(words.lower())
-        words = ["<s>", "<s>"] + words.split() + ["</s>", "</s>"]
+        words = ["<s>", "<s>"] + words.split() + ["</s>"]
         return super().sentence_probability(words)

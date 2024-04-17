@@ -43,7 +43,7 @@ class LanguageModel(ABC):
         self.uni_count = defaultdict(int)
         self.bi_count = defaultdict(int)
         self.tri_count = defaultdict(int)
-        self.uni_probabilities = defaultdict(self._defualt_uni_value)
+        self.uni_probabilities = defaultdict(self._default_uni_value)
         self.bi_probabilities = defaultdict(float)
         self.tri_probabilities = defaultdict(float)
 
@@ -65,7 +65,7 @@ class LanguageModel(ABC):
         return ret_str
 
     @abstractmethod
-    def _defualt_uni_value(self):
+    def _default_uni_value(self):
         """"""
 
     def _get_counts(self):
@@ -207,6 +207,35 @@ class LanguageModel(ABC):
         print(" ".join(words))
 
     @abstractmethod
+    def uni_sentence_probability(self, words):
+        sentence_probability = 1
+        for unigram in words:
+            prob = self.uni_probabilities[unigram]
+            sentence_probability *= prob
+
+        return sentence_probability
+
+    @abstractmethod
+    def bi_sentence_probability(self, words):
+        sentence_probability = 1
+        for index in range(len(words) - 2):
+            bigram = tuple(words[index : index+2])
+            prob = self.uni_probabilities[bigram]
+            sentence_probability *= prob
+
+        return sentence_probability
+
+    @abstractmethod
+    def tri_sentence_probability(self, words):
+        sentence_probability = 1
+        for index in range(len(words) - 3):
+            trigram = tuple(words[index : index+3])
+            prob = self.uni_probabilities[trigram]
+            sentence_probability *= prob
+
+        return sentence_probability
+
+    @abstractmethod
     def sentence_probability(self, words):
         """
         Calculate the probability of a given sentence according to the language model.
@@ -218,12 +247,9 @@ class LanguageModel(ABC):
             float: The probability of the given sentence according to the language model.
         """
         sentence_probability = 1
-
         for index in range(len(words) - 3):
-            trigram = tuple(words[index : index + 3])
+            trigram = tuple(words[index : index+3])
             prob = self._linear_interpolation(trigram)
             sentence_probability *= prob
 
-        print("The probability of the sentence:")
-        print(" ".join(words))
-        print(f"occuring was approximately {sentence_probability}")
+        return sentence_probability

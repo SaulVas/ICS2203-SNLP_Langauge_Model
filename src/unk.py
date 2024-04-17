@@ -9,7 +9,7 @@ from vanilla import VanillaLM
 from frequency_counts import handle_sentence, handle_sentence_unk
 
 
-class Unk(VanillaLM):
+class UnkLM(VanillaLM):
     def __init__(self):
         self.unknown_tokens = set()
         super().__init__()
@@ -123,10 +123,9 @@ class Unk(VanillaLM):
 
     def sentence_probability(self, words):
         words = self._remove_punctuation(words.lower())
-        words = ["<s>", "<s>"] + words.split() + ["</s>", "</s>"]
+        words = ["<s>", "<s>"] + words.split() + ["</s>"]
         for word, index in enumerate(words):
             if word in self.unknown_tokens:
                 words[index] = "<UNK>"
         return super().sentence_probability(words)
 
-unk = Unk()

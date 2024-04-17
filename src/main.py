@@ -2,8 +2,11 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 import json
 import os
-from frequency_counts import traverse_tree
+from frequency_counts import traverse_tree, retrieve_text
 from dataset_management import split_and_append_elements, write_xml_from_elements
+from vanilla import VanillaLM
+from laplace import LaplaceLM
+from unk import UnkLM
 
 # Creating n_gram counts for the entire corpus
 directories = ['aca', 'dem', 'fic', 'news']
@@ -50,3 +53,24 @@ if not (os.path.exists(TRAIN_FILE_PATH)
         os.remove(TEST_FILE_PATH)
     write_xml_from_elements(train, TRAIN_FILE_PATH)
     write_xml_from_elements(test, TEST_FILE_PATH)
+
+Vanilla = VanillaLM()
+laplace = LaplaceLM()
+unk = UnkLM()
+
+test_sentences = []
+test_tree = ET.parse("../data/test_set.xml")
+root = test_tree.getroot()
+for child in root:
+    test_sentences.append(retrieve_text(child))
+
+# Vanilla
+total_uni_log_prob = 0
+total_bi_log_prob = 0
+total_tri_log_prob = 0
+for sentence in test_sentences:
+
+    
+# Laplace
+    
+# Unk
