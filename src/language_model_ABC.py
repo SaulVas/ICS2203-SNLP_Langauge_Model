@@ -165,17 +165,14 @@ class LanguageModel(ABC):
     def _linear_interpolation(self, trigram):
         """"""
 
-    def text_generator(self, phrase):
+    @abstractmethod
+    def text_generator(self, words):
         """
         Generates text based on a given phrase using a language model.
 
         Args:
             phrase (str): The input phrase to generate text from.
         """
-        phrase = self._remove_punctuation(phrase)
-        words = phrase.lower().split()
-        words.insert(0, "<s>")
-
         if len(words) > 1:
             context = tuple(words[-2:])
             loop_prevention_counter = 0
@@ -209,7 +206,8 @@ class LanguageModel(ABC):
 
         print(" ".join(words))
 
-    def sentence_probability(self, sentence):
+    @abstractmethod
+    def sentence_probability(self, words):
         """
         Calculate the probability of a given sentence according to the language model.
 
@@ -219,8 +217,6 @@ class LanguageModel(ABC):
         Returns:
             float: The probability of the given sentence according to the language model.
         """
-        words = self._remove_punctuation(sentence.lower())
-        words = ["<s>", "<s>"] + words.split() + ["</s>", "</s>"]
         sentence_probability = 1
 
         for index in range(len(words) - 3):

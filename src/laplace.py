@@ -40,3 +40,14 @@ class LaplaceLM(LanguageModel):
                                                        + len(self.uni_count)))
 
         return uni_prob + bi_prob + tri_prob
+    
+    def text_generator(self, words):
+        words = self._remove_punctuation(words)
+        words = words.lower().split()
+        words.insert(0, "<s>")
+        return super().text_generator(words)
+    
+    def sentence_probability(self, words):
+        words = self._remove_punctuation(words.lower())
+        words = ["<s>", "<s>"] + words.split() + ["</s>", "</s>"]
+        return super().sentence_probability(words)

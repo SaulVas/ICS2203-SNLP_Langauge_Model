@@ -5,13 +5,17 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 import json
 import os
-from language_model_abc import LanguageModel
+from vanilla import VanillaLM
 from frequency_counts import handle_sentence, handle_sentence_unk
 
 
-class Unk(LanguageModel):
+class Unk(VanillaLM):
+    def __init__(self):
+        self.unknown_tokens = set()
+        super().__init__()
+
     def _defualt_uni_value(self):
-        return float
+        return float(1 / sum(self.uni_count.values()) + len(self.uni_count))
 
     def _get_counts(self):
         """
@@ -60,13 +64,13 @@ class Unk(LanguageModel):
         for child in root:
             handle_sentence(child, 1, n_gram_counts)
 
-        unknown_tokens = {key for key, count in n_gram_counts.items() if count < 2}
+        self.unknown_tokens = {key for key, count in n_gram_counts.items() if count <= 2}
 
         # Generate real counts:
         for number_of_words in range(1, 4):
             n_gram_counts = defaultdict(int)
             for child in root:
-                handle_sentence_unk(child, number_of_words, n_gram_counts, unknown_tokens)
+                handle_sentence_unk(child, number_of_words, n_gram_counts, self.unknown_tokens)
 
             with open(f'n_grams/unk/{number_of_words}_gram_counts.json',
                     'w', encoding='utf-8') as fp:
@@ -75,15 +79,54 @@ class Unk(LanguageModel):
         print(self.uni_count["<UNK>"])
 
     def _uni_gram_prob(self):
-        pass
+        total_tokens = float(sum(self.uni_count.values()))
+        for key in self.uni_count:
+            self.uni_probabilities[key] = ((self.uni_count[key] + 1)
+                                           / (total_tokens + len(self.uni_count)))
 
     def _bi_gram_prob(self):
-        pass
+        for key in self.bi_count:
+            words = tuple(key.split())
+            self.bi_probabilities[words] = ((self.bi_count[words] + 1)
+                                            / (self.uni_count[words[0]] + len(self.uni_count)))
 
     def _tri_gram_prob(self):
-        pass
+        for key in self.tri_count:
+            words = tuple(key.split())
+            bi_gram_key = words[0] + " " + words[1]
+            self.tri_probabilities[words] = ((self.tri_count[words] + 1)
+                                             / (self.bi_count[bi_gram_key] + len(self.uni_count)))
 
     def _linear_interpolation(self, trigram):
-        pass
+        uni_prob = 0.1 * self.uni_probabilities[trigram[-1]]
+
+        bi_prob = 0.3 * self.bi_probabilities.get(trigram[-2:],
+                                                  1
+                                                  / (self.uni_count.get(trigram[0], 1)
+                                                     + len(self.uni_count)))
+
+        tri_prob = 0.6 * self.tri_probabilities.get(trigram,
+                                                    1
+                                                    / (self.bi_count.get(trigram[:2], 1)
+                                                       + len(self.uni_count)))
+
+        return uni_prob + bi_prob + tri_prob
+
+    def text_generator(self, words):
+        words = self._remove_punctuation(words)
+        words = words.lower().split()
+        words.insert(0, "<s>")
+        for word, index in enumerate(words):
+            if word in self.unknown_tokens:
+                words[index] = "<UNK>"
+        return super().text_generator(words)
+    
+    def sentence_probability(self, words):
+        words = self._remove_punctuation(words.lower())
+        words = ["<s>", "<s>"] + words.split() + ["</s>", "</s>"]
+        for word, index in enumerate(words):
+            if word in self.unknown_tokens:
+                words[index] = "<UNK>"
+        return super().sentence_probability(words)
 
 unk = Unk()

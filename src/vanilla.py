@@ -66,8 +66,19 @@ class VanillaLM(LanguageModel):
 
     def _linear_interpolation(self, trigram):
         return ((0.6 * self.tri_probabilities[trigram])
-                + (0.3 * self.bi_probabilities[trigram[: 2]])
-                + (0.1 * self.uni_probabilities[trigram[0]])
-)
+                + (0.3 * self.bi_probabilities[trigram[-2:]])
+                + (0.1 * self.uni_probabilities[trigram[-1]]))
+    
+    def text_generator(self, words):
+        words = self._remove_punctuation(words)
+        words = words.lower().split()
+        words.insert(0, "<s>")
+        return super().text_generator(words)
+    
+    def sentence_probability(self, words):
+        words = self._remove_punctuation(words.lower())
+        words = ["<s>", "<s>"] + words.split() + ["</s>", "</s>"]
+        return super().sentence_probability(words)
+
 vanilla = VanillaLM()
 vanilla.sentence_probability("siegler is a fucking faggot")
