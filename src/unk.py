@@ -120,7 +120,7 @@ class Unk(VanillaLM):
             if word in self.unknown_tokens:
                 words[index] = "<UNK>"
         return super().text_generator(words)
-    
+
     def sentence_probability(self, words):
         words = self._remove_punctuation(words.lower())
         words = ["<s>", "<s>"] + words.split() + ["</s>", "</s>"]
