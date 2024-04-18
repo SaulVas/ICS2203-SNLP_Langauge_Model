@@ -126,28 +126,26 @@ def retrieve_text(node):
 def splitting_datasets():
     train_file_path = '../data/training_set.xml'
     test_file_path = '../data/test_set.xml'
-    if not (os.path.exists(train_file_path)
-            and os.path.exists(test_file_path)):
     # Splitting the corpus into train, validation, and test sets if not already created
-        train = []
-        test = []
+    train = []
+    test = []
 
-        for directory in directories:
-            dir_path = os.path.join(BASE_PATH, directory)
-            for file in os.listdir(dir_path):
-                if file.endswith('.xml'):
-                    file_path = os.path.join(dir_path, file)
-                    tree = ET.parse(file_path)
-                    root = tree.getroot()
-                    sentences = list(root.findall('.//s'))
-                    split_and_append_elements(sentences, train, test)
+    for directory in directories:
+        dir_path = os.path.join(BASE_PATH, directory)
+        for file in os.listdir(dir_path):
+            if file.endswith('.xml'):
+                file_path = os.path.join(dir_path, file)
+                tree = ET.parse(file_path)
+                root = tree.getroot()
+                sentences = list(root.findall('.//s'))
+                split_and_append_elements(sentences, train, test)
 
-        if os.path.exists(train_file_path):
-            os.remove(train_file_path)
-        if os.path.exists(test_file_path):
-            os.remove(test_file_path)
-        write_xml_from_elements(train, train_file_path)
-        write_xml_from_elements(test, test_file_path)
+    if os.path.exists(train_file_path):
+        os.remove(train_file_path)
+    if os.path.exists(test_file_path):
+        os.remove(test_file_path)
+    write_xml_from_elements(train, train_file_path)
+    write_xml_from_elements(test, test_file_path)
 
 def split_and_append_elements(s_elements, training_set, test_set):
     """

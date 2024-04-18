@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import json
-from dataset_functions import retrieve_text, model_perplexity
-# from dataset_functions import generate_corpus_counts, splitting_datasets
+import os
+from dataset_functions import retrieve_text, model_perplexity, generate_corpus_counts, splitting_datasets
 from vanilla import VanillaLM
 from laplace import LaplaceLM
 from unk import UnkLM
@@ -21,15 +21,83 @@ def calculate_perplexities(models):
     with open('../documentation/perplexity.json', 'w', encoding='utf-8') as fp:
         json.dump(perplexities, fp, indent=4)
 
-if __name__ == "__main__":
-    # generate_corpus_counts()
-    # splitting_datasets()
+def text_generation(models):
+    print("starting up text generation")
+    while True:
+        model_choice = input("""Please choose a model:\n
+                             Vanilla: 1\n
+                             Laplace: 2\n
+                             UNK: 3\n
+                             or press q to quit""").strip()
 
+        while model_choice not in ['1', '2', '3', 'q']:
+            print("Invalid input, try again")
+            model_choice = input()
+
+        sentence = input("Input a phrase to be finished by your selected model")
+        if model_choice == '1':
+            models[0].text_generator(sentence)
+        elif model_choice == '2':
+            models[1].text_generator(sentence)
+        elif model_choice == '3':
+            models[2].text_generator(sentence)
+        else:
+            break
+
+def sentence_probability_calculator(models):
+    print("starting up sentence probability calculator")
+    while True:
+        model_choice = input("""Please choose a model:\n
+                             Vanilla: 1\n
+                             Laplace: 2\n
+                             UNK: 3\n
+                             or press q to quit""").strip()
+
+        while model_choice not in ['1', '2', '3', 'q']:
+            print("Invalid input, try again")
+            model_choice = input()
+
+        sentence = input("Input a sentence")
+        if model_choice == '1':
+            models[0].sentence_probability(sentence)
+        elif model_choice == '2':
+            models[1].sentence_probability(sentence)
+        elif model_choice == '3':
+            models[2].sentence_probability(sentence)
+        else:
+            break
+
+if __name__ == "__main__":
+    if not (os.path.exists("corpus/1_gram_counts.json")
+            and os.path.exists("corpus/2_gram_counts.json")
+            and os.path.exists("corpus/3_gram_counts.json")):
+        print("Generating corpus counts...")
+        generate_corpus_counts()
+
+    if not (os.path.exists('../data/training_set.xml')
+            and os.path.exists('../data/test_set.xml')):
+        print("Splitting the data sets...")
+        splitting_datasets()
+
+    print("Training the models...")
     vanilla = VanillaLM()
     laplace = LaplaceLM()
     unk = UnkLM()
-
     lms = [vanilla, laplace, unk]
-    calculate_perplexities(lms)
 
-    
+    while True:
+        function_choice = input("Please choose a function:\n"
+                             + "Text Generation: 1\n"
+                             + "Sentence Probability Calculator: 2\n"
+                             + "or press q to quit\n").strip()
+
+        while function_choice not in ['1', '2', 'q']:
+            print("Invalid input, try again")
+            function_choice = input()
+
+        if function_choice == '1':
+            text_generation(lms)
+        elif function_choice == '2':
+            sentence_probability_calculator(lms)
+        else:
+            break
