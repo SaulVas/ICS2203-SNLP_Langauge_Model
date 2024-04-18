@@ -168,7 +168,7 @@ class LanguageModel(ABC):
     def _get_trigram_probability(self, trigram):
         """"""
 
-    def _linear_interpolation(self, trigram):
+    def linear_interpolation(self, trigram):
         uni_prob = 0.1 * self.uni_probabilities[trigram[-1]]
         bi_prob = 0.3 * self._get_bigram_probability(trigram[-2:])
         tri_prob = 0.6 * self._get_trigram_probability(trigram)
@@ -195,7 +195,7 @@ class LanguageModel(ABC):
 
                 for key in self.tri_probabilities:
                     if key[0:2] == context:
-                        token_probabilities[key[-1]] = self._linear_interpolation(key)
+                        token_probabilities[key[-1]] = self.linear_interpolation(key)
 
                 if not token_probabilities:
                     break
@@ -274,7 +274,7 @@ class LanguageModel(ABC):
         sentence_probability = 1
         for index in range(len(words) - 3):
             trigram = tuple(words[index : index+3])
-            prob = self._linear_interpolation(trigram)
+            prob = self.linear_interpolation(trigram)
             sentence_probability *= prob
 
         return sentence_probability

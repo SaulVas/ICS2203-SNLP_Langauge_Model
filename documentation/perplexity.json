@@ -1,20 +1,20 @@
 {
-    "vanilla": [
-        Infinity,
-        Infinity,
-        Infinity,
-        Infinity
-    ],
-    "laplace": [
-        Infinity,
+    "VanillaLM": [
+        950.8823892244349,
         Infinity,
         Infinity,
         Infinity
     ],
-    "unk": [
-        Infinity,
-        Infinity,
-        Infinity,
-        Infinity
+    "LaplaceLM": [
+        968.7404477720625,
+        4210.835103326405,
+        31259.873497648772,
+        0.6641901359818901
+    ],
+    "UnkLM": [
+        956.4026874268942,
+        1212.5970809409203,
+        1365.3826619855631,
+        1.615954134890169
     ]
 }

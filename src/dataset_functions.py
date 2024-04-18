@@ -6,10 +6,35 @@ Date: [8th april 2024]
 """
 
 import random
+import os
+import json
 import xml.etree.ElementTree as ET
+from collections import defaultdict
 import numpy as np
 
 random.seed(42)
+
+directories = ['aca', 'dem', 'fic', 'news']
+BASE_PATH = '../data/corpus/Texts/'
+
+def generate_corpus_counts():
+    for number_of_words in range(1, 4):
+        n_gram_counts = defaultdict(int)
+
+        for directory in directories:
+            dir_path = os.path.join(BASE_PATH, directory)
+            for file in os.listdir(dir_path):
+                if file.endswith('.xml'):
+                    file_path = os.path.join(dir_path, file)
+                    tree = ET.parse(file_path)
+                    root = tree.getroot()
+                    for child in root:
+                        if child.tag != 'teiHeader':
+                            traverse_tree(child, number_of_words, n_gram_counts)
+
+        with open(f'n_grams/corpus/{number_of_words}_gram_counts.json',
+                  'w', encoding='utf-8') as fp:
+            json.dump(n_gram_counts, fp, indent=4)
 
 def traverse_tree(node, number_of_words, counts):
     """ Recursively traverses the XML tree to find sentences and process their 
@@ -98,6 +123,32 @@ def retrieve_text(node):
                     text += retrieve_text(grandchild)
     return text
 
+def splitting_datasets():
+    train_file_path = '../data/training_set.xml'
+    test_file_path = '../data/test_set.xml'
+    if not (os.path.exists(train_file_path)
+            and os.path.exists(test_file_path)):
+    # Splitting the corpus into train, validation, and test sets if not already created
+        train = []
+        test = []
+
+        for directory in directories:
+            dir_path = os.path.join(BASE_PATH, directory)
+            for file in os.listdir(dir_path):
+                if file.endswith('.xml'):
+                    file_path = os.path.join(dir_path, file)
+                    tree = ET.parse(file_path)
+                    root = tree.getroot()
+                    sentences = list(root.findall('.//s'))
+                    split_and_append_elements(sentences, train, test)
+
+        if os.path.exists(train_file_path):
+            os.remove(train_file_path)
+        if os.path.exists(test_file_path):
+            os.remove(test_file_path)
+        write_xml_from_elements(train, train_file_path)
+        write_xml_from_elements(test, test_file_path)
+
 def split_and_append_elements(s_elements, training_set, test_set):
     """
     Splits the given list of elements into train, test, and test sets,
@@ -138,34 +189,36 @@ def write_xml_from_elements(elements, path):
     tree = ET.ElementTree(root)
     tree.write(path)
 
+
 def model_perplexity(model, sentences):
-    total_uni_log_prob = 0
-    total_bi_log_prob = 0
-    total_tri_log_prob = 0
-    total_lin_log_prob = 0
+    total_uni_pp = 0
+    total_bi_pp = 0
+    total_tri_pp = 0
+    total_lin_pp = 0
 
     for sentence in sentences:
+        # Calculate probabilities using the model methods
         uni_prob = model.uni_sentence_probability(sentence)
-        total_uni_log_prob += np.log(uni_prob)
-
         bi_prob = model.bi_sentence_probability(sentence)
-        total_bi_log_prob += np.log(bi_prob)
-
         tri_prob = model.tri_sentence_probability(sentence)
-        total_tri_log_prob += np.log(tri_prob)
+        lin_prob = model.linear_interpolation(sentence)
 
-        lin_prob = model.sentence_probability(sentence)
-        total_lin_log_prob += np.log(lin_prob)
+        # Apply the threshold to the probabilities
+        uni_pp = np.power(np.divide(1, uni_prob), (1 / len(sentence.split())))
+        total_uni_pp += uni_pp
 
-    average_uni_log_prob = total_uni_log_prob / len(sentences)
-    average_bi_log_prob = total_bi_log_prob / len(sentences)
-    average_tri_log_prob = total_tri_log_prob / len(sentences)
-    average_lin_log_prob = total_lin_log_prob / len(sentences)
+        bi_pp = np.power(np.divide(1, bi_prob), (1 / len(sentence.split())))
+        total_bi_pp += bi_pp
 
-    unigram_perplexity = np.power(2, -average_uni_log_prob)
-    bigram_perplexity = np.power(2, -average_bi_log_prob)
-    trigram_perplexity = np.power(2, -average_tri_log_prob)
-    linear_interpolation_perplexity = np.power(2, -average_lin_log_prob)
+        tri_pp = np.power(np.divide(1, tri_prob), (1 / len(sentence.split())))
+        total_tri_pp += tri_pp
 
-    return (unigram_perplexity, bigram_perplexity,
-            trigram_perplexity, linear_interpolation_perplexity)
+        lin_pp = np.power(np.divide(1, lin_prob), (1 / len(sentence.split())))
+        total_lin_pp += lin_pp
+
+    average_uni_pp = total_uni_pp / len(sentences)
+    average_bi_pp = total_bi_pp / len(sentences)
+    average_tri_pp = total_tri_pp / len(sentences)
+    average_lin_pp = total_lin_pp / len(sentences)
+
+    return (average_uni_pp, average_bi_pp, average_tri_pp, average_lin_pp)
