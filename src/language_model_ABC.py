@@ -175,7 +175,29 @@ class LanguageModel(ABC):
         tri_prob = 0.6 * self._get_trigram_probability(trigram)
         return uni_prob + bi_prob + tri_prob
 
-    def text_generator(self, sentence):
+    def _get_probable_tokens(self, context, choice):
+        token_probabilities = defaultdict(float)
+
+        if choice == '1':
+            for key, value in self.uni_probabilities.items():
+                token_probabilities[key] = value
+        elif choice == '2':
+            for key, value in self.bi_probabilities.items():
+                if key[0] == context[-1]:
+                    token_probabilities[key[-1]] = value
+        elif choice == '3':
+            for key, value in self.tri_probabilities.items():
+                if key[:2] == context:
+                    token_probabilities[key[-1]] = value
+        elif choice == '4':
+            for key in self.tri_probabilities:
+                if key[0:2] == context:
+                    token_probabilities[key[-1]] = self._linear_interpolation(key)
+
+        return token_probabilities
+
+
+    def text_generator(self, sentence, choice):
         """
         Generates text based on a given phrase using a language model.
 
@@ -193,14 +215,13 @@ class LanguageModel(ABC):
             loop_prevention_counter = 0
 
             while context[-1] not in ["</s>", ""] and loop_prevention_counter < 100:
-                token_probabilities = {}
-
-                for key in self.tri_probabilities:
-                    if key[0:2] == context:
-                        token_probabilities[key[-1]] = self._linear_interpolation(key)
+                token_probabilities = self._get_probable_tokens(context, choice)
 
                 if not token_probabilities:
                     break
+
+                if token_probabilities["<s>"] != 0:
+                    del token_probabilities["<s>"]
 
                 # semi-random selection of next word based on normalised probability
                 prob_sum = sum(token_probabilities.values())

@@ -37,13 +37,23 @@ def text_generation(models):
         if model_choice == 'q':
             break
 
+        ngram_choice = input("Please choose a model:\n"
+                             + "unigram: 1\n"
+                             + "bigram: 2\n"
+                             + "trigram: 3\n"
+                             + "linear interpolation: 4\n").strip()
+
+        while model_choice not in ['1', '2', '3', '4']:
+            print("Invalid input, try again")
+            ngram_choice = input()
+
         sentence = input("Input a phrase to be finished by your selected model\n")
         if model_choice == '1':
-            models[0].text_generator(sentence)
+            models[0].text_generator(sentence, ngram_choice)
         elif model_choice == '2':
-            models[1].text_generator(sentence)
+            models[1].text_generator(sentence, ngram_choice)
         elif model_choice == '3':
-            models[2].text_generator(sentence)
+            models[2].text_generator(sentence, ngram_choice)
 
 def sentence_probability_calculator(models):
     print("starting up sentence probability calculator")

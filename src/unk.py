@@ -10,8 +10,8 @@ from dataset_functions import handle_sentence, handle_sentence_unk
 
 class UnkLM(VanillaLM):
     def __init__(self):
-        self.unknown_tokens = set()
         super().__init__()
+        self.vocabulary = set(self.uni_count)
 
     def _defualt_uni_value(self):
         return float(1 / sum(self.uni_count.values()) + len(self.uni_count))
@@ -63,13 +63,13 @@ class UnkLM(VanillaLM):
         for child in root:
             handle_sentence(child, 1, n_gram_counts)
 
-        self.unknown_tokens = {key for key, count in n_gram_counts.items() if count <= 2}
+        unknown_tokens = {key for key, count in n_gram_counts.items() if count <= 2}
 
         # Generate real counts:
         for number_of_words in range(1, 4):
             n_gram_counts = defaultdict(int)
             for child in root:
-                handle_sentence_unk(child, number_of_words, n_gram_counts, self.unknown_tokens)
+                handle_sentence_unk(child, number_of_words, n_gram_counts, unknown_tokens)
 
             with open(f'n_grams/unk/{number_of_words}_gram_counts.json',
                     'w', encoding='utf-8') as fp:
@@ -99,26 +99,26 @@ class UnkLM(VanillaLM):
     def _get_bigram_probability(self, bigram):
         return self.bi_probabilities.get(bigram,
                                          1 / (self.uni_count.get(bigram[0], 1)
-                                                                 + len(self.uni_count)))
+                                              + len(self.uni_count)))
 
     def _get_trigram_probability(self, trigram):
         return self.tri_probabilities.get(trigram,
                                           1 / (self.bi_count.get(trigram[:2], 1)
                                                + len(self.uni_count)))
 
-    def text_generator(self, sentence):
+    def text_generator(self, sentence, choice):
         sentence = self._remove_punctuation(sentence)
         sentence = sentence.lower().split()
-        for word, index in enumerate(sentence):
-            if word in self.unknown_tokens:
+        for index, word in enumerate(sentence):
+            if word not in self.vocabulary:
                 sentence[index] = "<UNK>"
-        return super().text_generator(sentence)
+        return super().text_generator(sentence, choice)
 
     def uni_sentence_probability(self, words):
         words = self._remove_punctuation(words.lower())
         words = words.split()
         for word, index in enumerate(words):
-            if word in self.unknown_tokens:
+            if word not in self.vocabulary:
                 words[index] = "<UNK>"
         return super().uni_sentence_probability(words)
 
@@ -126,7 +126,7 @@ class UnkLM(VanillaLM):
         words = self._remove_punctuation(words.lower())
         words = ["<s>"] + words.split() + ["</s>"]
         for word, index in enumerate(words):
-            if word in self.unknown_tokens:
+            if word not in self.vocabulary:
                 words[index] = "<UNK>"
         return super().uni_sentence_probability(words)
 
@@ -134,7 +134,7 @@ class UnkLM(VanillaLM):
         words = self._remove_punctuation(words.lower())
         words = ["<s>", "<s>"] + words.split() + ["</s>"]
         for word, index in enumerate(words):
-            if word in self.unknown_tokens:
+            if word not in self.vocabulary:
                 words[index] = "<UNK>"
         return super().uni_sentence_probability(words)
 
@@ -142,6 +142,6 @@ class UnkLM(VanillaLM):
         words = self._remove_punctuation(words.lower())
         words = ["<s>", "<s>"] + words.split() + ["</s>"]
         for word, index in enumerate(words):
-            if word in self.unknown_tokens:
+            if word not in self.vocabulary:
                 words[index] = "<UNK>"
         return super().sentence_probability(words)
