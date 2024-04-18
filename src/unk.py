@@ -106,14 +106,13 @@ class UnkLM(VanillaLM):
                                           1 / (self.bi_count.get(trigram[:2], 1)
                                                + len(self.uni_count)))
 
-    def text_generator(self, words):
-        words = self._remove_punctuation(words)
-        words = words.lower().split()
-        words.insert(0, "<s>")
-        for word, index in enumerate(words):
+    def text_generator(self, sentence):
+        sentence = self._remove_punctuation(sentence)
+        sentence = sentence.lower().split()
+        for word, index in enumerate(sentence):
             if word in self.unknown_tokens:
-                words[index] = "<UNK>"
-        return super().text_generator(words)
+                sentence[index] = "<UNK>"
+        return super().text_generator(sentence)
 
     def uni_sentence_probability(self, words):
         words = self._remove_punctuation(words.lower())

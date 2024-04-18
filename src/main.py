@@ -24,53 +24,58 @@ def calculate_perplexities(models):
 def text_generation(models):
     print("starting up text generation")
     while True:
-        model_choice = input("""Please choose a model:\n
-                             Vanilla: 1\n
-                             Laplace: 2\n
-                             UNK: 3\n
-                             or press q to quit""").strip()
+        model_choice = input("Please choose a model:\n"
+                             + "Vanilla: 1\n"
+                             + "Laplace: 2\n"
+                             + "UNK: 3\n"
+                             + "or press q to quit\n").strip()
 
         while model_choice not in ['1', '2', '3', 'q']:
             print("Invalid input, try again")
             model_choice = input()
 
-        sentence = input("Input a phrase to be finished by your selected model")
+        if model_choice == 'q':
+            break
+
+        sentence = input("Input a phrase to be finished by your selected model\n")
         if model_choice == '1':
             models[0].text_generator(sentence)
         elif model_choice == '2':
             models[1].text_generator(sentence)
         elif model_choice == '3':
             models[2].text_generator(sentence)
-        else:
-            break
 
 def sentence_probability_calculator(models):
     print("starting up sentence probability calculator")
     while True:
-        model_choice = input("""Please choose a model:\n
-                             Vanilla: 1\n
-                             Laplace: 2\n
-                             UNK: 3\n
-                             or press q to quit""").strip()
+        model_choice = input("Please choose a model:\n"
+                             + "Vanilla: 1\n"
+                              + "Laplace: 2\n"
+                             + "UNK: 3\n"
+                             + "or press q to quit\n").strip()
 
         while model_choice not in ['1', '2', '3', 'q']:
             print("Invalid input, try again")
             model_choice = input()
 
-        sentence = input("Input a sentence")
-        if model_choice == '1':
-            models[0].sentence_probability(sentence)
-        elif model_choice == '2':
-            models[1].sentence_probability(sentence)
-        elif model_choice == '3':
-            models[2].sentence_probability(sentence)
-        else:
+        if model_choice == 'q':
             break
 
+        sentence = input("Input a sentence\n")
+        if model_choice == '1':
+            print("The probability of your sentence is: "
+                  + models[0].sentence_probability(sentence))
+        elif model_choice == '2':
+            print("The probability of your sentence is: "
+                  + models[1].sentence_probability(sentence))
+        elif model_choice == '3':
+            print("The probability of your sentence is: "
+                  + models[2].sentence_probability(sentence))
+
 if __name__ == "__main__":
-    if not (os.path.exists("corpus/1_gram_counts.json")
-            and os.path.exists("corpus/2_gram_counts.json")
-            and os.path.exists("corpus/3_gram_counts.json")):
+    if not (os.path.exists("n_grams/corpus/1_gram_counts.json")
+            and os.path.exists("n_grams/corpus/2_gram_counts.json")
+            and os.path.exists("n_grams/corpus/3_gram_counts.json")):
         print("Generating corpus counts...")
         generate_corpus_counts()
 
@@ -84,7 +89,6 @@ if __name__ == "__main__":
     laplace = LaplaceLM()
     unk = UnkLM()
     lms = [vanilla, laplace, unk]
-
 
     while True:
         function_choice = input("Please choose a function:\n"
@@ -102,4 +106,3 @@ if __name__ == "__main__":
             sentence_probability_calculator(lms)
         else:
             break
-     

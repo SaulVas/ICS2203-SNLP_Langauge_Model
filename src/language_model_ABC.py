@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 import json
 import os
+import numpy as np
 from abc import ABC, abstractmethod
 from dataset_functions import handle_sentence
 
@@ -71,10 +72,10 @@ class LanguageModel(ABC):
         """
         Loads the n-gram counts from JSON files if they exist, otherwise generates the counts.
 
-        If the JSON files for 1-gram, 2-gram, and 3-gram counts exist in the 'n_grams/vanilla_laplace'
-        directory, this method loads the counts from the files and assigns them to the
-        corresponding instance variables. If the files do not exist, it calls the
-        '_generate_counts' method to generate the counts.
+        If the JSON files for 1-gram, 2-gram, and 3-gram counts exist in the 
+        'n_grams/vanilla_laplace' directory, this method loads the counts from 
+        the files and assigns them to the corresponding instance variables. 
+        If the files do not exist, it calls the '_generate_counts' method to generate the counts.
 
         Args:
             None
@@ -168,24 +169,25 @@ class LanguageModel(ABC):
     def _get_trigram_probability(self, trigram):
         """"""
 
-    def linear_interpolation(self, trigram):
+    def _linear_interpolation(self, trigram):
         uni_prob = 0.1 * self.uni_probabilities[trigram[-1]]
         bi_prob = 0.3 * self._get_bigram_probability(trigram[-2:])
         tri_prob = 0.6 * self._get_trigram_probability(trigram)
         return uni_prob + bi_prob + tri_prob
 
-    def text_generator(self, words):
+    def text_generator(self, sentence):
         """
         Generates text based on a given phrase using a language model.
 
         Args:
             phrase (str): The input phrase to generate text from.
         """
+        words = sentence
         if not isinstance(words, list):
             words = self._remove_punctuation(words)
             words = words.lower().split()
-            words.insert(0, "<s>")
 
+        words.insert(0, "<s>")
         if len(words) > 1:
             context = tuple(words[-2:])
             loop_prevention_counter = 0
@@ -195,18 +197,19 @@ class LanguageModel(ABC):
 
                 for key in self.tri_probabilities:
                     if key[0:2] == context:
-                        token_probabilities[key[-1]] = self.linear_interpolation(key)
+                        token_probabilities[key[-1]] = self._linear_interpolation(key)
 
                 if not token_probabilities:
                     break
 
-                # semi-random selection of next word
+                # semi-random selection of next word based on normalised probability
+                prob_sum = sum(token_probabilities.values())
                 random_dec = random.random()
-                probabilities_sum = 0
+                running_sum = 0
                 for token, probability in sorted(token_probabilities.items(),
                                                  key=lambda item: item[1]):
-                    probabilities_sum += probability
-                    if probabilities_sum > random_dec:
+                    running_sum += np.divide(probability, prob_sum)
+                    if running_sum > random_dec:
                         word = token
                         break
 
@@ -274,7 +277,7 @@ class LanguageModel(ABC):
         sentence_probability = 1
         for index in range(len(words) - 3):
             trigram = tuple(words[index : index+3])
-            prob = self.linear_interpolation(trigram)
+            prob = self._linear_interpolation(trigram)
             sentence_probability *= prob
 
         return sentence_probability
