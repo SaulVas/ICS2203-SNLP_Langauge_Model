@@ -195,13 +195,11 @@ def model_perplexity(model, sentences):
     total_lin_pp = 0
 
     for sentence in sentences:
-        # Calculate probabilities using the model methods
         uni_prob = model.uni_sentence_probability(sentence)
         bi_prob = model.bi_sentence_probability(sentence)
         tri_prob = model.tri_sentence_probability(sentence)
-        lin_prob = model.linear_interpolation(sentence)
+        lin_prob = model.sentence_probability(sentence)
 
-        # Apply the threshold to the probabilities
         uni_pp = np.power(np.divide(1, uni_prob), (1 / len(sentence.split())))
         total_uni_pp += uni_pp
 

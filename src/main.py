@@ -85,6 +85,7 @@ if __name__ == "__main__":
     unk = UnkLM()
     lms = [vanilla, laplace, unk]
 
+
     while True:
         function_choice = input("Please choose a function:\n"
                              + "Text Generation: 1\n"
@@ -101,3 +102,4 @@ if __name__ == "__main__":
             sentence_probability_calculator(lms)
         else:
             break
+     
