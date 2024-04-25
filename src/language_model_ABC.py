@@ -7,8 +7,8 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 import json
 import os
-import numpy as np
 from abc import ABC, abstractmethod
+import numpy as np
 from dataset_functions import handle_sentence
 
 class LanguageModel(ABC):

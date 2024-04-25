@@ -1,7 +1,8 @@
 import xml.etree.ElementTree as ET
 import json
 import os
-from dataset_functions import retrieve_text, model_perplexity, generate_corpus_counts, splitting_datasets
+from dataset_functions import (retrieve_text, model_perplexity,
+                               generate_corpus_counts, splitting_datasets)
 from vanilla import VanillaLM
 from laplace import LaplaceLM
 from unk import UnkLM
