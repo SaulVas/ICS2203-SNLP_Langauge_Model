@@ -1,6 +1,7 @@
 """
 Implementation of the laplace (add 1) language model.
 """
+import sys
 from language_model_abc import LanguageModel
 
 class LaplaceLM(LanguageModel):
@@ -35,3 +36,15 @@ class LaplaceLM(LanguageModel):
         return self.tri_probabilities.get(trigram,
                                           1 / (self.bi_count.get(trigram[:2], 1)
                                                + len(self.uni_count)))
+
+    def uni_sentence_probability(self, words):
+        return max(super().uni_sentence_probability(words), sys.float_info.min)
+
+    def bi_sentence_probability(self, words):
+        return max(super().bi_sentence_probability(words), sys.float_info.min)
+
+    def tri_sentence_probability(self, words):
+        return max(super().tri_sentence_probability(words), sys.float_info.min)
+
+    def sentence_probability(self, words):
+        return max(super().sentence_probability(words), sys.float_info.min)

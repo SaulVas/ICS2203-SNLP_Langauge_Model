@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 import json
 import os
+import sys
 from vanilla import VanillaLM
 from dataset_functions import handle_sentence, handle_sentence_unk
 
@@ -117,31 +118,31 @@ class UnkLM(VanillaLM):
     def uni_sentence_probability(self, words):
         words = self._remove_punctuation(words.lower())
         words = words.split()
-        for word, index in enumerate(words):
+        for index, word in enumerate(words):
             if word not in self.vocabulary:
                 words[index] = "<UNK>"
-        return super().uni_sentence_probability(words)
+        return max(super().uni_sentence_probability(words), sys.float_info.min)
 
     def bi_sentence_probability(self, words):
         words = self._remove_punctuation(words.lower())
         words = ["<s>"] + words.split() + ["</s>"]
-        for word, index in enumerate(words):
+        for index, word in enumerate(words):
             if word not in self.vocabulary:
                 words[index] = "<UNK>"
-        return super().uni_sentence_probability(words)
+        return max(super().bi_sentence_probability(words), sys.float_info.min)
 
     def tri_sentence_probability(self, words):
         words = self._remove_punctuation(words.lower())
         words = ["<s>", "<s>"] + words.split() + ["</s>"]
-        for word, index in enumerate(words):
+        for index, word in enumerate(words):
             if word not in self.vocabulary:
                 words[index] = "<UNK>"
-        return super().uni_sentence_probability(words)
+        return max(super().tri_sentence_probability(words), sys.float_info.min)
 
     def sentence_probability(self, words):
         words = self._remove_punctuation(words.lower())
         words = ["<s>", "<s>"] + words.split() + ["</s>"]
-        for word, index in enumerate(words):
+        for index, word in enumerate(words):
             if word not in self.vocabulary:
                 words[index] = "<UNK>"
-        return super().sentence_probability(words)
+        return max(super().sentence_probability(words), sys.float_info.min)

@@ -9,7 +9,7 @@ from unk import UnkLM
 
 def calculate_perplexities(models):
     test_sentences = []
-    test_tree = ET.parse("../documentation/test_1.xml")
+    test_tree = ET.parse("../data/test_set.xml")
     root = test_tree.getroot()
     for child in root:
         test_sentences.append(retrieve_text(child))
@@ -101,6 +101,8 @@ if __name__ == "__main__":
     unk = UnkLM()
     lms = [vanilla, laplace, unk]
 
+    calculate_perplexities(lms)
+    
     while True:
         function_choice = input("Please choose a function:\n"
                              + "Text Generation: 1\n"

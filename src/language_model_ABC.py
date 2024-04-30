@@ -251,6 +251,8 @@ class LanguageModel(ABC):
         sentence_probability = 1
         for unigram in words:
             prob = self.uni_probabilities[unigram]
+            if prob == 0:
+                prob = self.uni_probabilities["<UNK>"]
             sentence_probability *= prob
 
         return sentence_probability
