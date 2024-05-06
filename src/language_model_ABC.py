@@ -10,6 +10,7 @@ import os
 from abc import ABC, abstractmethod
 import numpy as np
 from dataset_functions import handle_sentence
+import sys
 
 class LanguageModel(ABC):
     """
@@ -175,28 +176,6 @@ class LanguageModel(ABC):
         tri_prob = 0.6 * self._get_trigram_probability(trigram)
         return uni_prob + bi_prob + tri_prob
 
-    def _get_probable_tokens(self, context, choice):
-        token_probabilities = defaultdict(float)
-
-        if choice == '1':
-            for key, value in self.uni_probabilities.items():
-                token_probabilities[key] = value
-        elif choice == '2':
-            for key, value in self.bi_probabilities.items():
-                if key[0] == context[-1]:
-                    token_probabilities[key[-1]] = value
-        elif choice == '3':
-            for key, value in self.tri_probabilities.items():
-                if key[:2] == context:
-                    token_probabilities[key[-1]] = value
-        elif choice == '4':
-            for key in self.tri_probabilities:
-                if key[0:2] == context:
-                    token_probabilities[key[-1]] = self._linear_interpolation(key)
-
-        return token_probabilities
-
-
     def text_generator(self, sentence, choice):
         """
         Generates text based on a given phrase using a language model.
@@ -242,6 +221,27 @@ class LanguageModel(ABC):
             words.append("</s>")
 
         print(" ".join(words))
+
+    def _get_probable_tokens(self, context, choice):
+        token_probabilities = defaultdict(float)
+
+        if choice == '1':
+            for key, value in self.uni_probabilities.items():
+                token_probabilities[key] = value
+        elif choice == '2':
+            for key, value in self.bi_probabilities.items():
+                if key[0] == context[-1]:
+                    token_probabilities[key[-1]] = value
+        elif choice == '3':
+            for key, value in self.tri_probabilities.items():
+                if key[:2] == context:
+                    token_probabilities[key[-1]] = value
+        elif choice == '4':
+            for key in self.tri_probabilities:
+                if key[0:2] == context:
+                    token_probabilities[key[-1]] = self._linear_interpolation(key)
+
+        return token_probabilities
 
     def uni_sentence_probability(self, words):
         if not isinstance(words, list):
@@ -304,3 +304,36 @@ class LanguageModel(ABC):
             sentence_probability *= prob
 
         return sentence_probability
+
+    def calculate_space_needed(self):
+        size = sys.getsizeof(self.uni_count)        
+        for key, value in self.uni_count.items():
+            size += sys.getsizeof(key)
+            size += sys.getsizeof(value)
+
+        size += sys.getsizeof(self.bi_count)
+        for key, value in self.bi_count.items():
+            size += sys.getsizeof(key)
+            size += sys.getsizeof(value)
+        
+        size += sys.getsizeof(self.tri_count)
+        for key, value in self.tri_count.items():
+            size += sys.getsizeof(key)
+            size += sys.getsizeof(value)
+        
+        size += sys.getsizeof(self.uni_probabilities)
+        for key, value in self.uni_probabilities.items():
+            size += sys.getsizeof(key)
+            size += sys.getsizeof(value)
+
+        size += sys.getsizeof(self.bi_probabilities)
+        for key, value in self.bi_probabilities.items():
+            size += sys.getsizeof(key)
+            size += sys.getsizeof(value)
+        
+        size += sys.getsizeof(self.tri_probabilities)
+        for key, value in self.tri_probabilities.items():
+            size += sys.getsizeof(key)
+            size += sys.getsizeof(value)
+            
+        print(size)

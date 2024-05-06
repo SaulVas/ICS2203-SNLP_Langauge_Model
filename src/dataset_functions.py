@@ -201,7 +201,7 @@ def model_perplexity(model, sentences):
         bi_prob = model.bi_sentence_probability(sentence)
         tri_prob = model.tri_sentence_probability(sentence)
         lin_prob = model.sentence_probability(sentence)
-        
+
         if uni_prob == 0 or bi_prob == 0 or tri_prob == 0 or lin_prob == 0:
             uni_prob = model.uni_sentence_probability(sentence)
             bi_prob = model.bi_sentence_probability(sentence)

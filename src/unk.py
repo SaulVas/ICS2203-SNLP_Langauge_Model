@@ -76,8 +76,6 @@ class UnkLM(VanillaLM):
                     'w', encoding='utf-8') as fp:
                 json.dump(n_gram_counts, fp, indent=4)
 
-        print(self.uni_count["<UNK>"])
-
     def _generate_unigram_probs(self):
         total_tokens = float(sum(self.uni_count.values()))
         for key in self.uni_count:
@@ -146,3 +144,40 @@ class UnkLM(VanillaLM):
             if word not in self.vocabulary:
                 words[index] = "<UNK>"
         return max(super().sentence_probability(words), sys.float_info.min)
+
+    def calculate_space_needed(self):
+        size = sys.getsizeof(self.uni_count)        
+        for key, value in self.uni_count.items():
+            size += sys.getsizeof(key)
+            size += sys.getsizeof(value)
+
+        size += sys.getsizeof(self.bi_count)
+        for key, value in self.bi_count.items():
+            size += sys.getsizeof(key)
+            size += sys.getsizeof(value)
+
+        size += sys.getsizeof(self.tri_count)
+        for key, value in self.tri_count.items():
+            size += sys.getsizeof(key)
+            size += sys.getsizeof(value)
+
+        size += sys.getsizeof(self.uni_probabilities)
+        for key, value in self.uni_probabilities.items():
+            size += sys.getsizeof(key)
+            size += sys.getsizeof(value)
+
+        size += sys.getsizeof(self.bi_probabilities)
+        for key, value in self.bi_probabilities.items():
+            size += sys.getsizeof(key)
+            size += sys.getsizeof(value)
+
+        size += sys.getsizeof(self.tri_probabilities)
+        for key, value in self.tri_probabilities.items():
+            size += sys.getsizeof(key)
+            size += sys.getsizeof(value)
+
+        size += sys.getsizeof(self.vocabulary)
+        for key in self.vocabulary:
+            size += sys.getsizeof(key)
+            
+        print(size)

@@ -74,14 +74,11 @@ def sentence_probability_calculator(models):
 
         sentence = input("Input a sentence\n")
         if model_choice == '1':
-            print("The probability of your sentence is: "
-                  + models[0].sentence_probability(sentence))
+            print(f"The probability of your sentence is: {models[0].sentence_probability(sentence)}")
         elif model_choice == '2':
-            print("The probability of your sentence is: "
-                  + models[1].sentence_probability(sentence))
+            print(f"The probability of your sentence is: {models[1].sentence_probability(sentence)}")
         elif model_choice == '3':
-            print("The probability of your sentence is: "
-                  + models[2].sentence_probability(sentence))
+            print(f"The probability of your sentence is: {models[2].sentence_probability(sentence)}")
 
 if __name__ == "__main__":
     if not (os.path.exists("n_grams/corpus/1_gram_counts.json")
@@ -101,8 +98,8 @@ if __name__ == "__main__":
     unk = UnkLM()
     lms = [vanilla, laplace, unk]
 
-    calculate_perplexities(lms)
-    
+    # calculate_perplexities(lms)
+
     while True:
         function_choice = input("Please choose a function:\n"
                              + "Text Generation: 1\n"
